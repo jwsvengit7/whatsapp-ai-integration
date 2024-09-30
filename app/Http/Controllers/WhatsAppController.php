@@ -2,39 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Conversation;
-use App\Models\Customer;
+use App\Services\WhatsappService;
 use Illuminate\Http\Request;
 
 class WhatsAppController extends Controller
 {
+    /**
+     * @var WhatsappService
+     */
+    private WhatsappService $whatsappService;
+    public function __construct(WhatsappService $whatsappService)
+    {
+        $this->whatsappService = $whatsappService;
+    }
+
     public function receiveMessage(Request $request):string
     {
-        $incomingMessage = $request->input('Body');
-        $phoneNumber = $request->input('From');
-        $exists = Customer::where('email', 'test@example.com')->exists();
-
-
-        $customer = Customer::fi(
-            ['phone' => $phoneNumber],
-            ['phone'=>$phoneNumber,'name'=>'','email'=>'']
-        );
-
-        Conversation::created([
-            'customer_id' => $customer->id,
-            'message' => $incomingMessage,
-            'is_from_customer' => true,
-        ]);
-
-
-       return $this->sendMessage($phoneNumber, $incomingMessage);
+       return $this->whatsappService->receiveMessage($request);
     }
-
-    private function sendMessage($phoneNumber, $message):string
-    {
-        return "";
-
-    }
-
 
 }
