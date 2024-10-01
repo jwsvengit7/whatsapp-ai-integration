@@ -6,9 +6,7 @@ use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
-class CustomerController extends Controller
-{
-
+class CustomerController extends Controller {
     /**
      * @var CustomerService
      */

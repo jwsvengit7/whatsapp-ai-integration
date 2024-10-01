@@ -16,7 +16,7 @@ class ResponseUtils
      * @param int $statusCode
      * @return JsonResponse
      */
-    public static function respondWithSuccess($message, int $statusCode = Response::HTTP_OK): JsonResponse
+    public static function respondWithSuccess($message, int $statusCode): JsonResponse
     {
         return response()->json([
             'status'  => 'success',
