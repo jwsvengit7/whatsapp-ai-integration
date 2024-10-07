@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Services\WhatsappService;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
 
-class WhatsAppController extends Controller
+class WhatsAppController extends BaseController
 {
     /**
      * @var WhatsappService
@@ -16,9 +18,21 @@ class WhatsAppController extends Controller
         $this->whatsappService = $whatsappService;
     }
 
-    public function receiveMessage(Request $request):string
+
+    /**
+     * @throws \Exception
+     */
+    public function handleWebhook(Request $request)
     {
-       return $this->whatsappService->receiveMessage($request);
+        return $this->whatsappService->receiveMessage($request);
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    public function handleOpenAI(Request $request)
+    {
+        return $this->whatsappService->generateAIResponse($request);
     }
 
 }

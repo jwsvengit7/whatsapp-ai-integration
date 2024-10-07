@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller as BaseController;
 
-class CustomerController extends Controller {
+class CustomerController extends BaseController {
     /**
      * @var CustomerService
      */
@@ -23,7 +24,7 @@ class CustomerController extends Controller {
      * @return JsonResponse
      */
 
-    public function createUser(Request $request): JsonResponse
+    public function createCustomer(Request $request): JsonResponse
     {
         return $this->customerService->customerCreationImpl($request);
     }
