@@ -2,18 +2,14 @@
 
 namespace App\Services;
 
-use App\Helpers\CustomerUtils;
-use App\Helpers\ResponseUtils;
+use App\Helpers\AIHelpers;
 use App\Models\Conversation;
 use App\Models\Customer;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\HttpFoundation\Response;
 
 class WhatsappService
 {
@@ -22,101 +18,60 @@ class WhatsappService
      * Handle the reception of a new message.
      *
      * @param Request $request
-
      * @throws Exception
      */
     public function receiveMessage(Request $request)
     {
         if ($request->isMethod('get')) {
-            $verifyToken = env('WEBHOOK_VERIFY_TOKEN');
-            $hubVerifyToken = $request->input('hub.verify_token');
-            $hubChallenge = $request->input('hub.challenge');
+            Log::info('Webhook Verification Request:', $request->all());
+
+            $verifyToken = env("WEBHOOK_VERIFY_TOKEN");
+            $hubVerifyToken = $request->input('hub_verify_token');
+            $hubChallenge = $request->input('hub_challenge');
+
+            Log::info('verifyToken Verification Request:', ['token' => $verifyToken]);
+            Log::info('hubVerifyToken Verification Request:', ['hubVerifyToken' => $hubVerifyToken]);
+            Log::info('hubChallenge Request:', ['hubChallenge' => $hubChallenge]);
 
             if ($verifyToken === $hubVerifyToken) {
                 return response($hubChallenge, 200);
             }
-
             return response('Invalid verify token', 403);
         }
 
-
         if ($request->isMethod('post')) {
-            $data = $request->all();
+            Log::info('POST Webhook Message Request:', $request->all());
 
-            $validator = CustomerUtils::validateWebhookData($request);
-            if ($validator->fails()) {
-                return response($validator,404);
-            }
-            $phoneNumber = "";
             $entry = $request->input('entry');
-            if (!isset($entry[0]['changes'][0]['value']['messages'][0])) {
-                Log::error('Invalid webhook structure.');
-                return response('Invalid webhook structure.', Response::HTTP_BAD_REQUEST);
+            foreach ($entry as $event) {
+                $changes = $event['changes'];
+                foreach ($changes as $change) {
+                    $from = $change['value']['messages'][0]['from'] ?? null;
+                    $incomingMessage = $change['value']['messages'][0]['text']['body'] ?? null;
+
+                    Log::info('Incoming message:', ['from' => $from, 'message' => $incomingMessage]);
+
+                    if ($incomingMessage) {
+                        $aiMessage = $this->generateAIResponse($incomingMessage);
+                        $this->sendMessage($from, $aiMessage);
+                        if (!$this->findCustomerByPhone($from)->exists()) {
+                            $this->saveCustomerInformation($from);
+                        }
+                    }
+                }
             }
 
-
-            $data = $entry[0]['changes'][0]['value']['messages'][0];
-            $customer = Customer::firstOrCreate(
-                ['phone' => $phoneNumber],
-                ['email' => 'noreply@govt.com', 'phone' => $phoneNumber]
-            );
-            $message = $data['text']['body'] ?? null;
-            $sender = $data['from'];
-            $messageId = $data['id'];
-//
-            Log::info('Received WhatsApp message from ' . $sender . ': ' . $message);
-
-            $aiResponse = $this->generateAIResponse($message);
-            $this->sendMessage($phoneNumber, $aiResponse);
-            $this->saveMessage($customer->id, $message);
-
-            return response($aiResponse,
-            Response::HTTP_OK);
+            return response('Method not allowed', 405);
         }
     }
 
     /**
-     * Generate a response using the OpenAI API.
-     *
-     * @param Request $message
-     * @return string
      * @throws ConnectionException
-     */
-    public function generateAIResponse(Request $message): string
-    {
-        $url = 'https://api.openai.com/v1/chat/completions';
-        $apiKey = env('OPENAI_API_KEY');
-        $data = [
-            'model' => env('OPENAI_API_MODEL'),
-            'prompt' => ["role"=> "user", "content"=> $message->input("message")],
-            'max_tokens' => 150,
-            'temperature' => 0.7,
-        ];
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
-            'Content-Type' => 'application/json',
-        ])->post($url, $data);
-
-        if ($response->successful()) {
-            $responseBody = $response->json();
-            return $responseBody['choices'][0];
-        } else {
-            Log::error('Failed to get response from OpenAI: ' . $response->body());
-            return $response->body();
-        }
-    }
-
-    /**
-     * Send a WhatsApp message using the Meta Business API.
-     *
-     * @param string $to
-     * @param string $message
-     * @return void
-     * @throws ConnectionException
+     * @throws Exception
      */
     private function sendMessage(string $to, string $message): void
     {
-        $url = 'https://graph.facebook.com/20.0/' . env('WHATSAPP_BUSINESS_ID') . '/messages';
+        $url = 'https://graph.facebook.com/v12.0/' . env('WHATSAPP_BUSINESS_ID') . '/messages';
         $token = env('WHATSAPP_API_TOKEN');
 
         $data = [
@@ -130,7 +85,50 @@ class WhatsappService
         if (!$response->successful()) {
             Log::error('Failed to send WhatsApp message: ' . $response->body());
         }
+        $customer =$this->findCustomerByPhone($to);
+        $this->saveMessage($customer->id,$message);
     }
+
+
+
+    /**
+     * Generate a response using the OpenAI API.
+     *
+     * @param string $message
+     * @return string
+     * @throws Exception
+     */
+    public function generateAIResponse(string $message): string
+    {
+        $context = AIHelpers::AIContext();
+
+        $url = env("HUGGING_FACE_URL");
+        $apiKey = env('HUGGING_KEY');
+
+        $data = [
+            'model' => env('HUGGING_MODEL'),
+            'messages' => [
+                ["role" => "system", "content" => $context],
+                ["role" => "user", "content" => $message]
+            ],
+            'max_tokens' => 500,
+            'stream' => false,
+        ];
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $apiKey,
+            'Content-Type' => 'application/json',
+        ])->post($url, $data);
+
+        if ($response->successful()) {
+            $responseBody = $response->json();
+            return $responseBody['choices'][0]['message']['content'] ?? 'No response generated.';
+        } else {
+            Log::error('Failed to get response from OpenAI: ' . $response->body());
+            return 'Error generating response.';
+        }
+    }
+
 
     /**
      * Save the incoming message to the database.
@@ -154,5 +152,25 @@ class WhatsappService
         }
     }
 
+    /**
+     * @throws Exception
+     */
+    protected function saveCustomerInformation(int $phone): void
+    {
+        try {
+            Customer::create([
+                'phone' => $phone
+            ]);
+        } catch (Exception $e) {
+            Log::error('Failed to save customer: ' . $e->getMessage());
+            throw new Exception('Failed to save customer: ' . $e->getMessage());
+        }
+    }
+
+
+    protected function findCustomerByPhone($phone)
+    {
+        return Customer::where('phone', $phone);
+    }
 
 }

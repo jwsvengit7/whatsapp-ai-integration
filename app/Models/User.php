@@ -65,6 +65,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Product::class);
     }
 
+    public function vendorProducts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(VendorProduct::class, 'vendor_id');
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();

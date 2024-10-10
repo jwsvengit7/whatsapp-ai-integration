@@ -7,6 +7,8 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 
+;
+
 class WhatsAppController extends BaseController
 {
     /**
@@ -29,10 +31,10 @@ class WhatsAppController extends BaseController
 
     /**
      * @throws ConnectionException
+     * @throws \Exception
      */
-    public function handleOpenAI(Request $request)
+    public function handleOpenAI(Request $request): string
     {
         return $this->whatsappService->generateAIResponse($request);
     }
-
 }

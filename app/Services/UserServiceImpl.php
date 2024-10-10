@@ -10,11 +10,13 @@ use App\Helpers\ResponseUtils;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Random\RandomException;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -26,6 +28,7 @@ class UserServiceImpl implements UserService
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws RandomException
      */
     public function userSignup(Request $request): JsonResponse
     {
@@ -38,7 +41,6 @@ class UserServiceImpl implements UserService
             return ResponseUtils::respondWithError("Email Already Exist", Response::HTTP_CONFLICT);
         }
         $otp = CustomerUtils::generateOTP();
-
         try {
             $this->saveUser($request, $otp);
             return ResponseUtils::respondWithSuccess('User created successfully', Response::HTTP_CREATED);
@@ -60,7 +62,7 @@ class UserServiceImpl implements UserService
     protected function saveUser(Request $request, string $otp): void
     {
         try {
-            CustomerUtils::sendOTEmail($request->input('email'),$otp,$request->input('name'));
+
             User::create([
                 'email' => $request->input('email'),
                 'phone' => $request->input('phone'),
@@ -68,21 +70,22 @@ class UserServiceImpl implements UserService
                 'role' => $request->input('role'),
                 'status' => Status::INACTIVE->value,
                 'otp' => $otp,
-                'otp_date'=> now(),
+                'otp_date' => now(),
                 'password' => $request->input('password'),
             ]);
+            CustomerUtils::sendOTEmail($request->input('email'), $otp, $request->input('name'));
         } catch (Exception $e) {
             throw new Exception('Failed to save User: ' . $e->getMessage());
         }
     }
 
 
-    public function getUserById($id): JsonResponse
+    public function getUserById(): JsonResponse
     {
         try {
-            $customer = User::all();
+            $user = Auth::user();
             return ResponseUtils::respondWithSuccess(
-                $customer, Response::HTTP_OK);
+                $user, Response::HTTP_OK);
 
         } catch (ModelNotFoundException $e) {
             return ResponseUtils::respondWithError('User not found',
@@ -108,29 +111,29 @@ class UserServiceImpl implements UserService
 
         $user = $this->findUserByEmail($request->input("email"))->first();
 
-        if ($user==null) {
+        if ($user == null) {
             return ResponseUtils::respondWithError('User not found ', Response::HTTP_NOT_FOUND);
         }
         if ($user->status === Status::INACTIVE || $user->status === Status::DELETED) {
-            return ResponseUtils::respondWithError('User is Currently '.$user->status->name, 401);
+            return ResponseUtils::respondWithError('User is ' . $user->status->value . " Please verify your account", 401);
         }
 
         $expiresAt = Carbon::now()->addHour()->timestamp;
 
         $customClaims = [
             'email' => $user->email,
-            'status' =>$user->status,
+            'status' => $user->status,
             'exp' => $expiresAt,
         ];
         $token = JWTAuth::claims($customClaims)->attempt($validator->validated());
         return ResponseUtils::respondWithSuccess(
-            LoginResponse::loginResponse($user,$token)
-        , Response::HTTP_OK);
+            LoginResponse::loginResponse($user, $token)
+            , Response::HTTP_OK);
     }
 
-    public function changePassword(Request $request) : JsonResponse
+    public function changePassword(Request $request): JsonResponse
     {
-        return ResponseUtils::respondWithSuccess("",7);
+        return ResponseUtils::respondWithSuccess("", 7);
     }
 
 
@@ -139,32 +142,45 @@ class UserServiceImpl implements UserService
         $otp = $request->input("otp");
         $user = $this->findUserByEmail($request->input("email"))->first();
 
-
-        if ($user==null) {
+        if ($user == null) {
             return ResponseUtils::respondWithError('User not found ', Response::HTTP_NOT_FOUND);
         }
-        if($otp==$user->otp){
+        if ($otp == $user->otp) {
             if ($user->otp_date->addMinutes(5) < now()) {
                 return ResponseUtils::respondWithError('OTP has expired', Response::HTTP_CONFLICT);
             }
 
-        if ($user->status === Status::INACTIVE && $user->status !== Status::DELETED) {
+            if ($user->status === Status::INACTIVE && $user->status !== Status::DELETED) {
 
-            $user->status = Status::ACTIVE->value;
-            $user->save();
-            return ResponseUtils::respondWithSuccess($user, Response::HTTP_OK);
-        }
+                $user->status = Status::ACTIVE->value;
+                $user->save();
+                return ResponseUtils::respondWithSuccess($user, Response::HTTP_OK);
+            }
 
         }
-        return ResponseUtils::respondWithSuccess("OTP is invalid",Response::HTTP_CONFLICT);
+        return ResponseUtils::respondWithSuccess("OTP is invalid", Response::HTTP_CONFLICT);
     }
 
-    public function resendVerification(Request $request):JsonResponse
+    /**
+     * @throws RandomException
+     */
+    public function resendVerification(Request $request): JsonResponse
     {
-        return ResponseUtils::respondWithSuccess("",7);
+        $user = $this->findUserByEmail($request->input("email"))->first();
+
+
+        if ($user != null) {
+            $otp = CustomerUtils::generateOTP();
+            $user->otp =$otp;
+            $user->otp_date=now();
+            $user->save();
+                CustomerUtils::sendOTEmail($request->input('email'), $otp, $user->name);
+
+            return ResponseUtils::respondWithSuccess("OTP resent successfully.", 200);
+        } else {
+            return ResponseUtils::respondWithError("User not found.", 404);
+        }
     }
-
-
 
     protected function findUserByEmail($email)
     {

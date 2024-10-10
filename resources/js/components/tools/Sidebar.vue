@@ -1,14 +1,16 @@
 <script setup>
 
-    import image from '../../../../public/images/download.png';
-    import imageBg from '../../../../public/images/img_login_banner_right.929cc6f5.png';
+import image from '../../../../public/images/download.png';
+import logo from '../../../../public/images/kike-logo.png';
+import imageBg from '../../../../public/images/img_login_banner_right.929cc6f5.png';
 
 
 </script>
 
 <template>
     <div class="left">
-        <h2>Whatsapp AI</h2>
+        <p></p>
+       <img :src="logo" alt="" width="100">
         <div class="side-div">
             <h2 class="build">Build Powerful Interaction Apps with Voice & Video Chat API</h2>
             <div class="quick-integration">

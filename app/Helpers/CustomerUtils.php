@@ -49,7 +49,7 @@ class CustomerUtils
                 'regex:/[a-z]/',               // At least one lowercase letter
                 'regex:/[A-Z]/',               // At least one uppercase letter
                 'regex:/[0-9]/',               // At least one number
-                'regex:/[@$!%*?&#]/',          // At least one special character
+
             ],
         ]);
     }
@@ -63,7 +63,7 @@ class CustomerUtils
     /**
      * @throws RandomException
      */
-    public static function generateOTP($length = 5): string
+    public static function generateOTP($length = 4): string
     {
         $otp = '';
         for ($i = 0; $i < $length; $i++) {

@@ -72,11 +72,11 @@ class UserController extends BaseController
 
     /**
      * Fetch a user by ID.
-     * @param int $id
+
      * @return JsonResponse
      */
-    public function fetchUser(int $id): JsonResponse
+    public function fetchUser(): JsonResponse
     {
-        return $this->service->getUserById($id);
+        return $this->service->getUserById();
     }
 }

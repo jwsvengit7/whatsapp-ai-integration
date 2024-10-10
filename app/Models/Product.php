@@ -9,19 +9,22 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $table = 'product';
+    protected $table = 'products';
 
 
     protected $fillable = [
         'name',
         'price',
         'rate',
+        'image',
+        'description',
+        'user_id'
     ];
 
 
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(User::class);
     }
 
 

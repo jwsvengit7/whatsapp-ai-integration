@@ -2,8 +2,8 @@
 
 namespace App\Helpers;
 
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Contracts\Validation\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
 class ResponseUtils
