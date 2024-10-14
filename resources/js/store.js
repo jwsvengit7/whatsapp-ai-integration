@@ -1,12 +1,13 @@
 
 import { defineStore } from 'pinia';
-import {fetchUser,fetchAllUser,fetchAllCustomers} from "./components/services/userService.js";
+import {fetchUser, fetchAllUser, fetchAllCustomers, fetchAllProduct} from "./components/services/userService.js";
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        user: {email:"",name:"",phone:"",token:"",status:"",role:"",created_at:""},
+        user: {email:"",name:"",phone:"",token:"",status:"",role:"",created_at:"",image:""},
         allUsers:[],
         allCustomer:[],
+        allProduct:[],
         loading: false,
         error: null,
     }),
@@ -17,9 +18,9 @@ export const useUserStore = defineStore('user', {
             try {
                 const response = await fetchUser(token);
                 this.user = response.data.message;
-                console.log(response.data.message)
+
             } catch (err) {
-                this.error = 'Failed to load user data.';
+                this.error = 'Check your internet connections';
                 console.error(err);
             } finally {
                 this.loading = false;
@@ -30,10 +31,9 @@ export const useUserStore = defineStore('user', {
             this.error = null;
             try {
                 const response = await fetchAllUser(token);
-                this.allUsers = response.data.message; // Adjust as needed based on your API response
-                console.log(response.data.message)
+                this.allUsers = response.data.message;
             } catch (err) {
-                this.error = 'Failed to load user data.';
+                this.error = 'Check your internet connections';
                 console.error(err);
             } finally {
                 this.loading = false;
@@ -44,11 +44,24 @@ export const useUserStore = defineStore('user', {
             this.error = null;
             try {
                 const response = await fetchAllCustomers(token);
-                this.allCustomer = response.data.message; // Adjust as needed based on your API response
-                console.log(response.data.message)
-                console.log(response)
+                this.allCustomer = response.data.message;
+
             } catch (err) {
-                this.error = 'Failed to load user data.';
+                this.error = 'Check your internet connections';
+                console.error(err);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async loadAllProduct(token){
+            this.loading = true;
+            this.error = null;
+            try {
+                const response = await fetchAllProduct(token);
+                this.allProduct = response.data.message;
+
+            } catch (err) {
+                this.error = 'Check your internet connections';
                 console.error(err);
             } finally {
                 this.loading = false;

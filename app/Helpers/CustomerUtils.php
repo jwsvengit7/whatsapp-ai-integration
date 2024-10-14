@@ -4,6 +4,9 @@ namespace App\Helpers;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Services\Mail\EmailAdminNotification;
+use App\Services\Mail\EmailNotification;
+use App\Services\Mail\ResetPasswordNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -78,10 +81,12 @@ class CustomerUtils
             ],
         ]);
     }
-    public static function validateWebhookData(Request $request): \Illuminate\Contracts\Validation\Validator
+    public static function validateUpdateData(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         return Validator::make($request->all(), [
-            'message' => 'required',
+            'name' => 'required|string',
+            'address' => 'required|string',
+            'email' => 'required|string',
         ]);
     }
 
@@ -97,12 +102,29 @@ class CustomerUtils
         return $otp;
     }
 
+    /**
+     * @throws RandomException
+     */
+    public static function generateLink($length = 120): string
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $link = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $link .= $characters[random_int(0, $charactersLength - 1)];
+        }
+
+        return $link.time();
+    }
+
+
 
     public static function sendOTEmail($email, $otp,$userName): \Illuminate\Http\JsonResponse
     {
         Cache::put('otp_' . $email, $otp, now()->addMinutes(10));
         try {
-            Mail::to($email)->send(new \App\Services\Mail\EmailNotification($otp,$email,$userName));
+            Mail::to($email)->send(new EmailNotification($otp,$email,$userName));
             return response()->json(['message' => 'OTP sent successfully']);
         } catch (\Exception $e) {
             Log::error('Error sending OTP email: ' . $e->getMessage());
@@ -113,12 +135,25 @@ class CustomerUtils
     public static function sendAdminEmail($user,$rawPassword): \Illuminate\Http\JsonResponse
     {
         try {
-            Mail::to($user->email)->send(new \App\Services\Mail\EmailAdminNotification($user,$rawPassword));
-            return response()->json(['message' => 'OTP sent successfully']);
+            Mail::to($user->email)->send(new EmailAdminNotification($user,$rawPassword));
+            return response()->json(['message' => 'Mail sent successfully']);
         } catch (\Exception $e) {
-            Log::error('Error sending OTP email: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to send OTP email'.$e->getMessage()], 500);
+            Log::error('Error sending Mail : ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to send Mail email'.$e->getMessage()], 500);
         }
+    }
+
+    public static function sendLink($user): \Illuminate\Http\JsonResponse
+    {
+
+        try {
+            Mail::to($user->email)->send(new ResetPasswordNotification($user));
+            return response()->json(['message' => 'Mail sent successfully']);
+        } catch (\Exception $e) {
+            Log::error('Error sending Mail : ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to send Mail email'.$e->getMessage()], 500);
+        }
+
     }
 
 
@@ -134,7 +169,7 @@ class CustomerUtils
         }
 
         Log::info("Token " . json_encode($user));
-        Log::info("Email " . $user->email);
+        Log::info("Email " . $user->email ?? "");
         return  User::where("email",$user->email)->first();
     }
 

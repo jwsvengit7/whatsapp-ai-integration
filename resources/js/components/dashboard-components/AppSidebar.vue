@@ -4,7 +4,8 @@ import {defineProps} from "vue";
 
 
     function logout(){
-alert(1)
+  localStorage.clear();
+        window.location.replace('/account/login');
     }
 
 const props = defineProps({
@@ -29,17 +30,18 @@ const props = defineProps({
                 <span><span class="i1 fas fa-home"></span><span class="i">Dashboard</span></span>
                 </router-link>
             </div>
-            <div class="nav-content">
+            <div class="nav-content" v-if="props.data.role==='super_admin' || props.data.role === 'admin'">
                 <router-link to="/dashboard/customers">
                     <span><span class="i1 fas fa-users"></span><span class="i">Customers</span></span>
                 </router-link>
             </div>
-
-            <div class="nav-content">
-                <router-link to="/dashboard/account">
-                    <span><span class="i1 fas fa-usd"></span><span class="i">Account</span></span>
+            <div class="nav-content" v-if="props.data.role==='vendor'">
+                <router-link to="/dashboard/my-customer">
+                    <span><span class="i1 fas fa-users"></span><span class="i">My Customers</span></span>
                 </router-link>
             </div>
+
+
 
             <div class="nav-content">
                 <router-link to="/dashboard/chat-feature">
@@ -47,12 +49,8 @@ const props = defineProps({
                     <span><span class="i1 fas fa-message"></span><span class="i">Chatbot Features</span></span>
                 </router-link>
             </div>
-            <div class="nav-content">
-                <router-link to="/dashboard/setting">
-                    <span><span class="i1 fas fa-gear"></span><span class="i">Settings</span></span>
-                </router-link>
-            </div>
-            <div v-if="props.data.role==='super_admin'" class="nav-content">
+
+            <div v-if="props.data.role==='super_admin' || props.data.role === 'admin'" class="nav-content">
                 <router-link to="/dashboard/create-product">
                     <span><span class="i1 fas fa-file"></span><span class="i">Create Product</span></span>
                 </router-link>
@@ -62,10 +60,21 @@ const props = defineProps({
                     <span><span class="i1 fas fa-gears"></span><span class="i">Add Admin</span></span>
                 </router-link>
             </div>
-            <div class="nav-content" v-if="props.data.role==='super_admin'">
+            <div class="nav-content" v-if="props.data.role==='super_admin' || props.data.role === 'admin'">
+                <router-link to="/dashboard/all-product">
+
+                    <span><span class="i1 fas fa-users"></span><span class="i">All Product</span></span>
+                </router-link>
+            </div>
+            <div class="nav-content" v-if="props.data.role==='super_admin' || props.data.role === 'admin'">
                 <router-link to="/dashboard/users">
 
                     <span><span class="i1 fas fa-users"></span><span class="i">Users</span></span>
+                </router-link>
+            </div>
+            <div class="nav-content">
+                <router-link to="/dashboard/setting">
+                    <span><span class="i1 fas fa-gear"></span><span class="i">Settings</span></span>
                 </router-link>
             </div>
             <div class="nav-content logout">
@@ -84,7 +93,7 @@ const props = defineProps({
 
 <style scoped>
 .logout{
-    margin-top: 150px;
+    margin-top: 170px;
 }
 .i{
     padding-left: 5px;

@@ -63,7 +63,7 @@ export default {
                 localStorage.setItem('token', response.data.message.data.token);
                 localStorage.setItem('role', response.data.message.data.role);
                 console.log(response.data.message.data)
-                await router.push('/dashboard');
+                 window.location.replace('/dashboard');
             } catch (err) {
                 error.value = err.response?.data.message || 'Login failed. Please try again.';
                 console.error(err);

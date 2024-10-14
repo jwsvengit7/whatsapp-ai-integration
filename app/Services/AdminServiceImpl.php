@@ -11,12 +11,10 @@ use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
-use Tymon\JWTAuth\JWTGuard;
 
 class AdminServiceImpl implements AdminService
 {
@@ -47,19 +45,17 @@ class AdminServiceImpl implements AdminService
             return ResponseUtils::respondWithValidationErrors($validator);
         }
 
-        // Handle image upload if present
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images', 'public'); // Save to storage
+            $imagePath = $request->file('image')->store('images', 'public');
         }
 
-        // Create the product
         $product = Product::create([
             'name' => $request->input('name'),
             'price' => $request->input('price'),
             'description' => $request->input('description'),
             'rate' => $request->input('rate'),
-            'image' => $imagePath, // Store the image path
+            'image' => $imagePath,
             'user_id' => $user->id,
         ]);
 
@@ -67,8 +63,9 @@ class AdminServiceImpl implements AdminService
     }
 
 
-
-
+    /**
+     * @throws Exception
+     */
     public function createAdmin(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = CustomerUtils::validateAdminData($request);
@@ -79,9 +76,6 @@ class AdminServiceImpl implements AdminService
 
        $user= CustomerUtils::getJWTUser();
 
-        if ($user==null) {
-            return ResponseUtils::respondWithError("User not found. ", 404);
-        }
 
         if ($user->role !== UserRole::SUPER_ADMIN) {
             return ResponseUtils::respondWithError("User does not have permissions to create admin.", 403);
@@ -109,6 +103,7 @@ class AdminServiceImpl implements AdminService
         try {
             DB::beginTransaction();
 
+
             $user= User::create([
                 'email' => $request->input('email'),
                 'phone' => $request->input('phone'),
@@ -131,22 +126,16 @@ class AdminServiceImpl implements AdminService
     {
        try{
            $user= CustomerUtils::getJWTUser();
-           if($user==null){
-               return ResponseUtils::respondWithError("User not found.", 404);
-           }
+
            if ($user->role != UserRole::SUPER_ADMIN && $user->role != UserRole::ADMIN) {
-               return ResponseUtils::respondWithError("User does not have permissions to create admin.", 403);
+               return ResponseUtils::respondWithError("User does not have permissions.", Response::HTTP_UNAUTHORIZED);
            }
            $users = User::all();
            return ResponseUtils::respondWithSuccess(
                $users, Response::HTTP_OK);
 
-       } catch (ModelNotFoundException $e) {
-           return ResponseUtils::respondWithError('User not found',
-               Response::HTTP_NOT_FOUND);
-       } catch (Exception $e) {
-           Log::error('Failed to fetch User: ' . $e->getMessage());
-           return ResponseUtils::respondWithError('An error occurred while fetching the User',
+       } catch (ModelNotFoundException | Exception $e) {
+           return ResponseUtils::respondWithError($e->getMessage(),
                Response::HTTP_INTERNAL_SERVER_ERROR);
        }
     }

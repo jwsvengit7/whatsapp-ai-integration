@@ -13,4 +13,8 @@ interface UserService
     public function resendVerification(Request $request);
     public function updateAccount(Request $req):JsonResponse;
 
+    public function forgetPassword(Request $request):JsonResponse;
+
+    public function verifyLink($token) : JsonResponse;
+
 }

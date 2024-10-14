@@ -189,7 +189,7 @@ export default {
     width:55%
 }
 .information label {
-    color: #ccc;
+    color: #9f9e9e;
     font-size: 13px;
 }
 .information label span {

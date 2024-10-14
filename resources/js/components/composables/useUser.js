@@ -28,11 +28,19 @@ export const useUser = () => {
         loading.value = false;
         console.log("All users data loaded:", store.allCustomer);
     };
+    const loadAllProduct = async () => {
+        loading.value = true;
+        const token = localStorage.getItem("token");
+        await store.loadAllProduct(token);
+        loading.value = false;
+        console.log("All users data loaded:", store.allProduct);
+    };
 
     const user = computed(() => store.user);
     const allUsers = computed(() => store.allUsers);
     const allCustomers = computed(() => store.allCustomer);
+    const allProduct = computed(() => store.allProduct);
     const error = computed(() => store.error);
 
-    return { loadUser,loadAllUsers,loadAllCustomers, user,allUsers,allCustomers, loading, error };
+    return { loadUser,loadAllUsers,loadAllCustomers,loadAllProduct, user,allUsers,allCustomers,allProduct, loading, error };
 };

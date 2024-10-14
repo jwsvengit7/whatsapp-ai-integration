@@ -4,12 +4,21 @@
         <main>
             <AppHeader text="Settings" :data="user" />
             <div class="box-container">
-                <p v-if="user">Welcome, {{ user.name }}!</p>
-                <p v-else>Please log in to access features.</p>
+
                 <Preloader :loading="loadings" />
                 <form class="add-container" @submit.prevent="createNewAdmin">
                     <div class="container-box">
-                        <p>Admin Information</p>
+                        <p>Update Information</p>
+                        <center><div style="width: 100px;height:100px;border-radius: 100px">
+                            <label for="file" style="position: absolute;margin-top: 50px;margin-left: 80px;color: orange;font-size: 18px;cursor: pointer" class="fas fa-upload"></label>
+
+                            <input type="file" style="display: none" id="file" @change="onImageChange"  />
+                            <img v-if="previewImage" :src="previewImage"  style="width: 100%;height:100%;border-radius: 100px"  alt=""/>
+                            <img v-else :src="utils.getImage(user.image)" style="width: 100%;height:100%;border-radius: 100px"  alt=""/>
+                        </div>
+                        </center>
+                        <p></p>
+
                         <div class="information" >
                             <label>Email&nbsp;<span>*</span></label>
                             <input
@@ -43,16 +52,12 @@
                         </div>
 
 
-                    </div>
-                    <div class="container-box">
-                        <p>Address</p>
+
                         <div class="information">
                             <label>Location&nbsp;<span>*</span></label>
                             <input v-model="location" type="text" name="address"  required />
                         </div>
-                    </div>
-                    <div class="container-box">
-                        <p>Admin Vital Information</p>
+
                         <div class="information">
                             <div class="information">
                                 <label>Role&nbsp;<span>*</span></label>
@@ -64,6 +69,7 @@
                             <input v-model="user.role" type="password" name="password" required />
                         </div>
                     </div>
+
                     <div class="container-box">
                         <div class="information">
                             <button :disabled="loadings">Submit</button>
@@ -99,19 +105,30 @@ export default {
         const name = ref('');
         const location = ref('');
         const phone = ref('');
+        const image = ref('');
         const role = ref('');
         const loadings = ref(false);
         const errors = ref('');
+        const previewImage =ref('')
 
         const adminFields = ref([
             { text: 'First Name', model: name, type: 'text', name: 'name' },
             { text: 'Email', model: email, type: 'email', name: 'email' },
             { text: 'Phone', model: phone, type: 'text', name: 'phone' },
         ]);
+        const onImageChange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                image.value = file; // Store the file
+                previewImage.value = URL.createObjectURL(file); // Preview the image
+            }
+        };
+
 
         const createNewAdmin = async () => {
             loadings.value = true;
             errors.value = '';
+
 
             try {
                 const response = await axios.post('/create-admin', {
@@ -182,6 +199,8 @@ export default {
             loadings,
             errors,
             adminFields,
+            onImageChange, // For handling image change
+            previewImage,
             createNewAdmin,
             user,
         };
@@ -193,6 +212,9 @@ export default {
 .add-container {
     width: 100%;
     height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .container-box {
     width: 45%;
@@ -210,7 +232,7 @@ export default {
 }
 .information input,
 .information-select {
-    width: 51%;
+    width: 60%;
     padding: 10px;
     border-radius: 5px;
     outline: none;

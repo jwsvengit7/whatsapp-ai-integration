@@ -2,52 +2,39 @@
     <div class="dashboard">
         <AppSidebar :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Users" :data="user"></AppHeader>
+            <AppHeader text="All Product" :data="user"></AppHeader>
             <div class="box-container">
+                <!-- User Table -->
                 <table class="user-table">
                     <thead>
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Role</th>
-
+                        <th>Rate</th>
+                        <th>Price</th>
                         <th>Date Joined</th>
-                        <th>Status</th>
                         <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(item, index) in allUsers" :key="index">
+                    <tr v-for="(item, index) in allProduct" :key="index">
                         <td>{{ index+1 }}</td>
-                        <td>    <div style="display: flex;align-items: center"><img :src="utils.getImage(item.image)" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>&nbsp;{{ item.name }}</div></td>
-                        <td>{{ item.email }}</td>
-                        <td>{{ item.phone }}</td>
-                        <td>{{ utils.getRole(item.role) }}</td>
-
+                        <td>    <div style="display: flex;align-items: center"><img :src="utils.getImage(item.image)" alt=""  style="width:35px;height: 35px;border-radius: 30px"/>&nbsp;{{ item.name }}</div></td>
+                        <td>{{ item.rate }}</td>
+                        <td><span style="text-decoration: line-through;">N</span>{{ item.price }}</td>
                         <td>{{ utils.getDateFormat(item.created_at) }}</td>
-                        <td>   <button
-                            :class="{
-                                   'active-status': item.status === 'active',
-                                    'inactive-status': item.status === 'inactive'
-                                    }"  class="but">
-                            {{ item.status.toUpperCase() }}
-                        </button></td>
-                        <td>
-                            <button class="but">Delete</button>
+                        <td><button class="but">Delete</button>
 
-                            <button class="but">Edit</button>
-                        </td>
+                            <button class="but">Edit</button></td>
                     </tr>
                     <tr v-if="loading">
-                        <td colspan="8">Loading...</td>
+                        <td colspan="6">Loading...</td>
                     </tr>
                     <tr v-if="error">
-                        <td colspan="8">Error: {{ error }}</td>
+                        <td colspan="6">Error: {{ error }}</td>
                     </tr>
-                    <tr v-if="!loading && !allUsers.length && !error">
-                        <td colspan="8">No users available</td>
+                    <tr v-if="!loading && !allProduct.length && !error">
+                        <td colspan="6">No users available</td>
                     </tr>
                     </tbody>
                 </table>
@@ -64,25 +51,23 @@ import pic from "../../../../public/images/1723524642068.jpeg";
 import Utils from "../../Utils.js";
 
 export default {
-    name: 'Users',
+    name: 'AllProduct',
     computed: {
         pic() {
-            return pic
+            return `${pic}`
         }
     },
     components: { AppHeader, AppSidebar},
     setup() {
-        const { loadUser,loadAllUsers,allUsers, user, loading, error } = useUser();
-        const userList = ref([]);
+        const { loadUser,loadAllProduct,allProduct, user, loading, error } = useUser();
+
         const utils = new Utils();
-
-
         onMounted(() => {
             loadUser();
-            loadAllUsers();
+            loadAllProduct();
         });
 
-        return { allUsers,user, loading, error ,utils};
+        return { allProduct,user, loading, error ,utils};
     }
 };
 </script>
@@ -124,16 +109,6 @@ export default {
     border-radius: 5px;
 }
 .but:nth-child(2){
-    background: orange;
-}
-
-.active-status {
-    background-color: #007bff;
-    font-size: 10px;
-}
-
-.inactive-status {
-    background-color: orange;
-    font-size: 10px;
+    background: #0d1a3a;
 }
 </style>

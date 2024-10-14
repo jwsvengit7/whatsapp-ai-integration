@@ -31,6 +31,10 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     Route::post('/resend', [UserController::class, 'resendVerification']);
     Route::post('/verify-otp', [UserController::class, 'confirmAccount']);
     Route::post('/change-password', [UserController::class, 'changePassword']);
+    Route::post('/forget-password', [UserController::class, 'forgetPassword']);
+    Route::get('/verify-link/{token}', [UserController::class, 'verifyLink']);
+
+
 
     // Admin
 

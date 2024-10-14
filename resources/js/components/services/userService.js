@@ -15,13 +15,20 @@ export const fetchAllUser =async (token)=>{
         }
     });
 }
-export const fetchAllCustomers =async (token)=>{
-    console.log(token)
-    console.log("********")
+export const fetchAllCustomers =async (token)=> {
+
     return await axios.get('/all-customer', {
         headers: {
             Authorization: `Bearer ${token}`
         }
     });
+}
+    export const fetchAllProduct =async (token)=>{
+
+        return await axios.get('/fetch-product', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
 }
 

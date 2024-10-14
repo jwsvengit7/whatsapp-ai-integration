@@ -49,6 +49,10 @@ class UserController extends BaseController
     {
         return $this->service->confirmAccount($request);
     }
+    public function verifyLink($token): JsonResponse
+    {
+        return $this->service->verifyLink($token);
+    }
 
     /**
      * Handle user confirm status.
@@ -58,6 +62,11 @@ class UserController extends BaseController
     public function changePassword(Request $request): JsonResponse
     {
         return $this->service->changePassword($request);
+    }
+
+    public function  forgetPassword(Request $request): JsonResponse
+    {
+        return $this->service->forgetPassword($request);
     }
 
     /**

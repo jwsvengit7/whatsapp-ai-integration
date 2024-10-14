@@ -11,6 +11,8 @@ import CreateProduct from "./components/pages/CreateProduct.vue";
 import AddAdmin from "./components/pages/AddAdmin.vue";
 import Users from "./components/pages/Users.vue";
 import Settings from "./components/pages/Settings.vue";
+import ChangePassword from "./components/pages/ChangePassword.vue";
+import AllProduct from "./components/pages/AllProduct.vue";
 
 const routes = [
     { path: '/', component: Home, name: 'Home' },
@@ -18,6 +20,7 @@ const routes = [
     { path: '/account/signup', component: Signup, name: 'Signup' },
     { path: '/account/forget-password', component: ForgetPassword, name: 'ForgetPassword' },
     { path: '/account/verify-otp', component: VerifyOTP, name: 'VerifyOTP' },
+    { path: '/account/change-password', component: ChangePassword, name: 'ChangePassword' },
     // { path: '/dashboard', component: Dashboard, name: 'Dashboard' },
     { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/dashboard/chat-feature', component: ChatBotFeature, name: 'ChatBotFeature' },
@@ -26,6 +29,7 @@ const routes = [
     { path: '/dashboard/users', component: Users, name: 'Users' },
     { path: '/dashboard/add-admin', component: AddAdmin, name: 'AddAdmin' },
     { path: '/dashboard/create-product', component: CreateProduct, name: 'CreateProduct' },
+    { path: '/dashboard/all-product', component: AllProduct, name: 'AllProduct' },
 ];
 
 const router = createRouter({

@@ -1,7 +1,9 @@
 <script setup>
 import { defineProps } from 'vue';
-import pic from '../../../../public/images/1723524642068.jpeg';
+import Utils from "../../Utils.js";
 // Define props
+
+const utils = new Utils()
 const props = defineProps({
 
     text: {
@@ -25,9 +27,9 @@ const props = defineProps({
             <div class="content">
                 <button>Invite a member</button>
                 <div style="cursor: pointer;display: flex;align-items: center;justify-content: space-around;margin-left: 10px">
-                    <img :src="pic" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>
+                    <img :src="utils.getImage(props.data.image)" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>
                     &nbsp;
-                    <span>{{data.name}}</span>
+                    <span>{{props.data.name}}</span>
                     <span class="fas fa-chevron-down"></span>
                 </div>
             </div>

@@ -3,14 +3,12 @@
 namespace App\Services;
 
 use App\Enums\Status;
-use App\Enums\UserRole;
 use App\Helpers\CustomerUtils;
 use App\Helpers\Response as LoginResponse;
 use App\Helpers\ResponseUtils;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -71,6 +69,7 @@ class UserServiceImpl implements UserService
                 'status' => Status::INACTIVE->value,
                 'otp' => $otp,
                 'otp_date' => now(),
+                'image'=> 'user/default.png',
                 'password' => $request->input('password'),
             ]);
             CustomerUtils::sendOTEmail($request->input('email'), $otp, $request->input('name'));
@@ -162,12 +161,12 @@ class UserServiceImpl implements UserService
     }
 
 
-    public function updateAccount(Request $request): JsonResponse
+    public function updateAccount(Request $req): JsonResponse
     {
 
         try {
             $userAuth= CustomerUtils::getJWTUser();
-            if($userAuth->email===$request->input("email")){
+            if($userAuth->email===$req->input("email")){
                 return ResponseUtils::respondWithError("User not found.", 404);
             }
 
@@ -178,10 +177,10 @@ class UserServiceImpl implements UserService
             }
 
             if ($user->status === Status::INACTIVE && $user->status !== Status::DELETED) {
-                $user->phone = $request->input("phone");
-                $user->address = $request->input("address");
-                $user->password = bcrypt($request->input('password'));
-                $user->name = $request->input("name");
+                $user->phone = $req->input("phone");
+                $user->address = $req->input("address");
+                $user->password = bcrypt($req->input('password'));
+                $user->name = $req->input("name");
                 $user->save();
                 return ResponseUtils::respondWithSuccess($user, Response::HTTP_OK);
             }else{
@@ -219,4 +218,40 @@ class UserServiceImpl implements UserService
     }
 
 
+    public function forgetPassword(Request $request): JsonResponse
+    {
+        try {
+            $user=$this->findUserByEmail($request->input("email"))->first();
+        if ($user->exists()) {
+            $link = CustomerUtils::generateLink();
+            $user->remember_token=$link;
+            $user->link_expiration=now();
+            $user->save();
+            CustomerUtils::sendLink($user);
+            return ResponseUtils::respondWithSuccess('Link sent successfully to '.$user->email, Response::HTTP_CREATED);
+        }
+            return ResponseUtils::respondWithError('User not found', Response::HTTP_NOT_FOUND);
+
+        } catch (Exception $e) {
+            Log::error('Customer creation failed: ' . $e->getMessage());
+            return ResponseUtils::respondWithError('An error occurred while creating the customer', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function verifyLink($token): JsonResponse
+    {
+
+        $user = User::where("remember_token",$token)->first();
+
+        if ($user == null) {
+            return ResponseUtils::respondWithError('User not found ', Response::HTTP_NOT_FOUND);
+        }
+        if ($token == $user->remember_token) {
+            if ($user->link_expiration->addMinutes(10) < now()) {
+                return ResponseUtils::respondWithError('Link has expired', Response::HTTP_CONFLICT);
+            }
+                return ResponseUtils::respondWithSuccess("User", Response::HTTP_OK);
+        }
+        return ResponseUtils::respondWithSuccess("Link is invalid", Response::HTTP_CONFLICT);
+    }
 }

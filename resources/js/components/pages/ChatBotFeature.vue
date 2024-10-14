@@ -4,9 +4,7 @@
         <main>
             <AppHeader text="Product Feature" :data="user"></AppHeader>
             <div class="box-container">
-                <Feature></Feature>
-                <p v-if="user">Welcome, {{ user.name }}!</p>
-                <p v-else>Please log in to access features.</p>
+                <Feature :data="allProduct"></Feature>
             </div>
         </main>
     </div>
@@ -25,14 +23,15 @@ export default {
     name: 'ChatBotFeature',
     components: {Feature, AppHeader, AppSidebar},
     setup() {
-        const { loadUser, user, loading, error } = useUser();
+        const { loadUser, user, loadAllProduct,allProduct,loading, error } = useUser();
 
         onMounted(() => {
             loadUser();
+            loadAllProduct()
 
         });
 
-        return { user, loading, error };
+        return { user, loading, error,allProduct };
     }
 
 

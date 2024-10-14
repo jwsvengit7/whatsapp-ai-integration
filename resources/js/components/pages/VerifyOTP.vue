@@ -16,7 +16,7 @@
                     </div>
                     <p class="error-message" v-if="error">{{ error }}</p>
                     <button type="submit" class="login-button">Verify OTP</button>
-                    <p class="resend">Didn't receive the OTP? <span style="cursor: pointer" @click="resendOTP" class="resend-link">Resend</span></p>
+                    <p class="resend">Didn't receive the OTP? <span style="cursor: pointer" @click="sendOTP" class="resend-link">Resend</span></p>
                 </form>
             </div>
         </div>
@@ -74,16 +74,15 @@ const submitOTP = async () => {
     }
 };
 
-const resendOTP = async () => {
-    const sendOTP = async ()=>  {
-        loading.value = true; // Set loading state
-        error.value = '';
-        try {
-            const response = await axios.post('/resend', {
-                email: localStorage.getItem("email")?.toString(),
+const sendOTP = async ()=> {
+    loading.value = true; // Set loading state
+    error.value = '';
+    try {
+        const response = await axios.post('/resend', {
+            email: localStorage.getItem("email")?.toString(),
 
-            });
-            if(response.status===200 || response.status===201){
+        });
+        if (response.status === 200 || response.status === 201) {
 
             await Swal.fire({
                 title: 'Success!',
@@ -91,22 +90,19 @@ const resendOTP = async () => {
                 icon: 'success',
                 confirmButtonText: 'Okay'
             });
-                }
-            console.log(response.data);
-
-        } catch (err) {
-            error.value = err.response?.data.message || 'Login failed. Please try again.';
-            console.error(err);
-        } finally {
-            loading.value = false;
         }
+        console.log(response.data);
+
+    } catch (err) {
+        error.value = err.response?.data.message || 'Login failed. Please try again.';
+        console.error(err);
+    } finally {
+        loading.value = false;
     }
 
-    try {
-        await sendOTP()
-    } catch (err) {
-        console.error('Failed to resend OTP:', err);
-    }
+
+
+
 };
 </script>
 

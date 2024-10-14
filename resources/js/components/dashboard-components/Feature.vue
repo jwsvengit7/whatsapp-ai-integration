@@ -1,39 +1,31 @@
 <script setup>
 import fuel from '../../../../public/images/fuel.jpeg';
+import {defineProps} from "vue";
+import Utils from "../../Utils.js";
+
+const utils=new Utils();
+const props = defineProps({
+
+
+    data: {
+        type: {},
+        required: true
+    },
+
+});
 </script>
 <template>
 <div class="box-div">
-    <div class="box">
-        <p>Bio Fuel</p>
-        <img :src="fuel"  alt="" />
-        <p class="p"><span style="text-decoration: line-through;">N</span>10,000</p>
-        <button>Sell</button>
-
-
-    </div>
-    <div class="box">
-        <p>Kerosene</p>
-        <img :src="fuel"  alt="" />
-        <p class="p"><span style="text-decoration: line-through;">N</span>10,000</p>
+    <div class="box" v-for="(item, index) in props.data" :key="index">
+        <p>{{item.name}}</p>
+        <img :src="utils.getImage(item.image)"  alt="" />
+        <p class="p"><span style="text-decoration: line-through;">N</span>{{item.price}}</p>
         <button>Sell</button>
 
 
     </div>
 
-    <div class="box">
-        <p>Gel</p>
-        <img :src="fuel"  alt="" />
-        <p class="p"><span style="text-decoration: line-through;">N</span>10,000</p>
-        <button>Sell</button>
 
-    </div>
-    <div class="box">
-        <p>Fuel</p>
-        <img :src="fuel"  alt="" />
-        <p class="p"><span style="text-decoration: line-through;">N</span>10,000</p>
-        <button>Sell</button>
-
-    </div>
 
 
 </div>
@@ -43,13 +35,14 @@ import fuel from '../../../../public/images/fuel.jpeg';
 <style scoped>
 .box-div{
     width:100%;
-    height: auto;
+    height: 600px;
+    overflow: scroll;
     display: flex;
     flex-wrap: wrap;
 }
 .box {
     width: 200px;
-    height: 300px;
+    height: 250px;
     border-radius: 10px;
     border: 1px solid #ccc;
     margin: 10px;
@@ -68,10 +61,8 @@ import fuel from '../../../../public/images/fuel.jpeg';
     }
 
     img {
-        border-radius: 205px;
-        width: 130px;
-        height: 130px;
-
+        width: 100%;
+        height: 100px;
     }
 }
 .box .p{

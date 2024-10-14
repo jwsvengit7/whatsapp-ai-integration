@@ -23,10 +23,12 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         "phone",
+        'image',
         'otp',
         'status',
         'role',
         'otp_date',
+        'link_expiration',
         'address'
     ];
 
@@ -53,6 +55,7 @@ class User extends Authenticatable implements JWTSubject
         return $casts = [
         'email_verified_at' => 'datetime',
             'otp_date'=> 'datetime',
+            'link_expiration'=>'datetime',
         'password' => 'hashed',
             'role' => UserRole::class,
             'status' => Status::class,
