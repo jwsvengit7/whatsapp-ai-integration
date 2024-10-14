@@ -6,22 +6,25 @@ use App\Helpers\AIHelpers;
 use App\Models\Conversation;
 use App\Models\Customer;
 use Exception;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WhatsappService
 {
-
     /**
      * Handle the reception of a new message.
      *
      * @param Request $request
+     * @return ResponseFactory|Application|Response|void
+     * @throws ConnectionException
      * @throws Exception
      */
-    public function receiveMessage(Request $request)
-    {
+    public function receiveMessage(Request $request) {
         if ($request->isMethod('get')) {
             Log::info('Webhook Verification Request:', $request->all());
 
@@ -69,8 +72,7 @@ class WhatsappService
      * @throws ConnectionException
      * @throws Exception
      */
-    private function sendMessage(string $to, string $message): void
-    {
+    private function sendMessage(string $to, string $message): void {
         $url = 'https://graph.facebook.com/v12.0/' . env('WHATSAPP_BUSINESS_ID') . '/messages';
         $token = env('WHATSAPP_API_TOKEN');
 
@@ -98,8 +100,7 @@ class WhatsappService
      * @return string
      * @throws Exception
      */
-    public function generateAIResponse(string $message): string
-    {
+    public function generateAIResponse(string $message): string {
         $context = AIHelpers::AIContext();
 
         $url = env("HUGGING_FACE_URL");
@@ -138,8 +139,7 @@ class WhatsappService
      * @return void
      * @throws Exception
      */
-    protected function saveMessage(int $customerId, string $message): void
-    {
+    protected function saveMessage(int $customerId, string $message): void {
         try {
             Conversation::create([
                 'customer_id' => $customerId,
@@ -155,8 +155,7 @@ class WhatsappService
     /**
      * @throws Exception
      */
-    protected function saveCustomerInformation(int $phone): void
-    {
+    protected function saveCustomerInformation(int $phone): void {
         try {
             Customer::create([
                 'phone' => $phone
@@ -168,8 +167,7 @@ class WhatsappService
     }
 
 
-    protected function findCustomerByPhone($phone)
-    {
+    protected function findCustomerByPhone($phone){
         return Customer::where('phone', $phone);
     }
 

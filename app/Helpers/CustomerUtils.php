@@ -3,7 +3,9 @@
 namespace App\Helpers;
 
 use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -53,6 +55,29 @@ class CustomerUtils
             ],
         ]);
     }
+    public  static function validateAdminData(Request $request): \Illuminate\Contracts\Validation\Validator
+    {
+
+        return Validator::make($request->all(), [
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|min:10|unique:users,phone',
+            'name'  => 'required|string|max:255',
+            'address'  => 'required|string|max:999',
+            'role'  => ['required', function ($attribute, $value, $fail) {
+                if (!in_array($value, UserRole::getValues())) {
+                    $fail("The $attribute must be a valid role.");
+                }
+            }],
+            'password' => [
+                'required',
+                'string',
+                'regex:/[a-z]/',               // At least one lowercase letter
+                'regex:/[A-Z]/',               // At least one uppercase letter
+                'regex:/[0-9]/',               // At least one number
+
+            ],
+        ]);
+    }
     public static function validateWebhookData(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         return Validator::make($request->all(), [
@@ -84,4 +109,33 @@ class CustomerUtils
             return response()->json(['error' => 'Failed to send OTP email'.$e->getMessage()], 500);
         }
     }
+
+    public static function sendAdminEmail($user,$rawPassword): \Illuminate\Http\JsonResponse
+    {
+        try {
+            Mail::to($user->email)->send(new \App\Services\Mail\EmailAdminNotification($user,$rawPassword));
+            return response()->json(['message' => 'OTP sent successfully']);
+        } catch (\Exception $e) {
+            Log::error('Error sending OTP email: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to send OTP email'.$e->getMessage()], 500);
+        }
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public static function getJWTUser(): User
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            throw new \Exception('User not authenticated');
+        }
+
+        Log::info("Token " . json_encode($user));
+        Log::info("Email " . $user->email);
+        return  User::where("email",$user->email)->first();
+    }
+
 }

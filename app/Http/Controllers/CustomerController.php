@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\HttpUtils;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +16,7 @@ class CustomerController extends BaseController {
     public function __construct(CustomerService $customerService)
     {
         $this->customerService = $customerService;
+        $this->middleware('auth:api')->except(HttpUtils::URLs());
     }
 
     /**
@@ -32,6 +34,10 @@ class CustomerController extends BaseController {
     public function fetchCustomer($id): JsonResponse
     {
         return $this->customerService->getCustomerById($id);
+    }
+    public function fetchAllCustomer(): JsonResponse
+    {
+        return $this->customerService->fetchAllCustomer();
     }
 
 

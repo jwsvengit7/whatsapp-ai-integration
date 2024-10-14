@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 
+use App\Helpers\ResponseUtils;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -20,6 +21,7 @@ class Handler extends ExceptionHandler
      */
     protected $dontReport = [
         // Your exception classes here
+
     ];
 
     /**
@@ -39,7 +41,7 @@ class Handler extends ExceptionHandler
             ], $this->getHttpStatusCode($e));
         }
 
-        return parent::render($request, $e->getMessage());
+        return parent::render($request, $e);
     }
 
     /**

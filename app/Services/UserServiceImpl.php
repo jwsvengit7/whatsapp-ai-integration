@@ -83,7 +83,7 @@ class UserServiceImpl implements UserService
     public function getUserById(): JsonResponse
     {
         try {
-            $user = Auth::user();
+           $user= CustomerUtils::getJWTUser();
             return ResponseUtils::respondWithSuccess(
                 $user, Response::HTTP_OK);
 
@@ -159,6 +159,37 @@ class UserServiceImpl implements UserService
 
         }
         return ResponseUtils::respondWithSuccess("OTP is invalid", Response::HTTP_CONFLICT);
+    }
+
+
+    public function updateAccount(Request $request): JsonResponse
+    {
+
+        try {
+            $userAuth= CustomerUtils::getJWTUser();
+            if($userAuth->email===$request->input("email")){
+                return ResponseUtils::respondWithError("User not found.", 404);
+            }
+
+            $user = $this->findUserByEmail($userAuth->email)->first();
+
+            if ($user == null) {
+                return ResponseUtils::respondWithError('User not found ', Response::HTTP_NOT_FOUND);
+            }
+
+            if ($user->status === Status::INACTIVE && $user->status !== Status::DELETED) {
+                $user->phone = $request->input("phone");
+                $user->address = $request->input("address");
+                $user->password = bcrypt($request->input('password'));
+                $user->name = $request->input("name");
+                $user->save();
+                return ResponseUtils::respondWithSuccess($user, Response::HTTP_OK);
+            }else{
+                return ResponseUtils::respondWithError("Verify your account", Response::HTTP_BAD_GATEWAY);
+            }
+        }catch(Exception $e) {
+            return ResponseUtils::respondWithError($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

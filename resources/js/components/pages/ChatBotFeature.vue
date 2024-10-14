@@ -1,6 +1,6 @@
 <template>
     <div class="dashboard">
-        <AppSidebar></AppSidebar>
+        <AppSidebar :data="user"></AppSidebar>
         <main>
             <AppHeader text="Product Feature" :data="user"></AppHeader>
             <div class="box-container">

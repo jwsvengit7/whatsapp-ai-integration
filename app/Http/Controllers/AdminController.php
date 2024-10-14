@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\HttpUtils;
-use App\Models\Product;
 use App\Services\AdminService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -29,15 +28,15 @@ class AdminController extends BaseController
     {
         return $this->service->createProduct($request);
     }
-
-    /**
-     * Handle user login.
-
-     * @return JsonResponse
-     */
-    public function fetchProduct(): JsonResponse
+    public function createAdmin(Request $request): JsonResponse
     {
-        return $this->service->fetchProduct();
+        return $this->service->createAdmin($request);
+    }
+
+
+    public function fetchAllUsers(): JsonResponse
+    {
+        return $this->service->fetchAllUsers();
     }
 
 

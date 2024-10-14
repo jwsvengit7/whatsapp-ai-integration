@@ -7,6 +7,10 @@ import ForgetPassword from "./components/pages/ForgetPassword.vue";
 import VerifyOTP from "./components/pages/VerifyOTP.vue";
 import ChatBotFeature from "./components/pages/ChatBotFeature.vue";
 import Customer from "./components/pages/Customer.vue";
+import CreateProduct from "./components/pages/CreateProduct.vue";
+import AddAdmin from "./components/pages/AddAdmin.vue";
+import Users from "./components/pages/Users.vue";
+import Settings from "./components/pages/Settings.vue";
 
 const routes = [
     { path: '/', component: Home, name: 'Home' },
@@ -18,6 +22,10 @@ const routes = [
     { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/dashboard/chat-feature', component: ChatBotFeature, name: 'ChatBotFeature' },
     { path: '/dashboard/customers', component: Customer, name: 'Customer' },
+    { path: '/dashboard/setting', component: Settings, name: 'Settings' },
+    { path: '/dashboard/users', component: Users, name: 'Users' },
+    { path: '/dashboard/add-admin', component: AddAdmin, name: 'AddAdmin' },
+    { path: '/dashboard/create-product', component: CreateProduct, name: 'CreateProduct' },
 ];
 
 const router = createRouter({

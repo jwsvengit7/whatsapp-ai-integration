@@ -75,7 +75,6 @@ export default {
             name:'',
             c_password:'',
             phone:'',
-
             password: '',
             loading: false,
             error: ''

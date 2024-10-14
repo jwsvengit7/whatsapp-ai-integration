@@ -26,7 +26,8 @@ class User extends Authenticatable implements JWTSubject
         'otp',
         'status',
         'role',
-        'otp_date'
+        'otp_date',
+        'address'
     ];
 
     /**
@@ -39,6 +40,8 @@ class User extends Authenticatable implements JWTSubject
         'otp',
         'remember_token',
     ];
+
+
 
     /**
      * Get the attributes that should be cast.

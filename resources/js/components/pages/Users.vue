@@ -2,27 +2,32 @@
     <div class="dashboard">
         <AppSidebar :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Customers" :data="user"></AppHeader>
+            <AppHeader text="Users" :data="user"></AppHeader>
             <div class="box-container">
                 <!-- User Table -->
                 <table class="user-table">
                     <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
+                        <th>Role</th>
+                        <th>Status</th>
                         <th>Date Joined</th>
                         <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(item, index) in allCustomers" :key="index">
+                    <tr v-for="(item, index) in allUsers" :key="index">
                         <td>{{ index+1 }}</td>
                         <td>    <div style="display: flex;align-items: center"><img :src="pic" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>&nbsp;{{ item.name }}</div></td>
-
+                        <td>{{ item.email }}</td>
                         <td>{{ item.phone }}</td>
+                        <td>{{ utils.getRole(item.role) }}</td>
+                        <td><b>{{ item.status.toUpperCase() }}</b></td>
                         <td>{{ utils.getDateFormat(item.created_at) }}</td>
-                        <td><button style="background: none;border: 0 none;outline: none;cursor: pointer"><b>Conversations</b></button></td>
+                        <td><button style="background: none;border: 0 none;outline: none;cursor: pointer"><b>:</b></button></td>
                     </tr>
                     <tr v-if="loading">
                         <td colspan="5">Loading...</td>
@@ -30,7 +35,7 @@
                     <tr v-if="error">
                         <td colspan="5">Error: {{ error }}</td>
                     </tr>
-                    <tr v-if="!loading && !allCustomers.length && !error">
+                    <tr v-if="!loading && !allUsers.length && !error">
                         <td colspan="5">No users available</td>
                     </tr>
                     </tbody>
@@ -56,17 +61,17 @@ export default {
     },
     components: { AppHeader, AppSidebar},
     setup() {
-        const { loadUser,loadAllCustomers,allCustomers, user, loading, error } = useUser();
+        const { loadUser,loadAllUsers,allUsers, user, loading, error } = useUser();
         const userList = ref([]);
         const utils = new Utils();
 
 
         onMounted(() => {
             loadUser();
-            loadAllCustomers();
+            loadAllUsers();
         });
 
-        return { allCustomers,user, loading, error ,utils};
+        return { allUsers,user, loading, error ,utils};
     }
 };
 </script>

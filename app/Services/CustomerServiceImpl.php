@@ -3,6 +3,7 @@
 
 namespace App\Services;
 
+use App\Enums\UserRole;
 use App\Helpers\CustomerUtils;
 use App\Helpers\ResponseUtils;
 use App\Models\Customer;
@@ -68,15 +69,32 @@ class CustomerServiceImpl implements CustomerService
             return ResponseUtils::respondWithSuccess(
                 $customer, Response::HTTP_OK);
 
-        } catch (ModelNotFoundException $e) {
-            return ResponseUtils::respondWithError('Customer not found',
-                Response::HTTP_NOT_FOUND);
-        } catch (Exception $e) {
-            Log::error('Failed to fetch customer: ' . $e->getMessage());
-            return ResponseUtils::respondWithError('An error occurred while fetching the customer',
+        } catch (ModelNotFoundException | Exception $e) {
+            return ResponseUtils::respondWithError($e->getMessage(),
                 Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
     }
 
+    public function fetchAllCustomer(): JsonResponse
+    {
+        try{
+        $user= CustomerUtils::getJWTUser();
+        if($user==null){
+            return ResponseUtils::respondWithError("User not found.", 404);
+        }
+         if ($user->role !== UserRole::SUPER_ADMIN && $user->role !== UserRole::ADMIN) {
+                return ResponseUtils::respondWithError("User does not have permissions.", 403);
+            }
+         else {
+            $customer = Customer::all();
+            return ResponseUtils::respondWithSuccess(
+                $customer, Response::HTTP_OK);
+        }
+    }catch (Exception $e){
+            Log::error('Failed to fetch customer: ' . $e->getMessage());
+            return ResponseUtils::respondWithError('An error occurred while fetching the customer',
+                Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

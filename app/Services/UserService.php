@@ -11,5 +11,6 @@ interface UserService
     public function confirmAccount(Request $request) :JsonResponse;
     public function changePassword(Request $request):JsonResponse;
     public function resendVerification(Request $request);
+    public function updateAccount(Request $req):JsonResponse;
 
 }

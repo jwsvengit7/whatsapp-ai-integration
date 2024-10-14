@@ -7,5 +7,8 @@ interface AdminService
 
     public function createProduct(\Illuminate\Http\Request $request);
 
-    public function fetchProduct();
+
+    public function createAdmin(\Illuminate\Http\Request $request);
+
+    public function fetchAllUsers();
 }

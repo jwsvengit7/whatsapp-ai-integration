@@ -70,6 +70,12 @@ class UserController extends BaseController
         return $this->service->resendVerification($request);
     }
 
+
+    public function updateAccount(Request $request): JsonResponse
+    {
+        return $this->service->updateAccount($request);
+    }
+
     /**
      * Fetch a user by ID.
 
