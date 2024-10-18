@@ -46,13 +46,13 @@ const props = defineProps({
             <div class="nav-content">
                 <router-link to="/dashboard/chat-feature">
 
-                    <span><span class="i1 fas fa-message"></span><span class="i">Chatbot Features</span></span>
+                    <span><span class="i1 fas fa-message"></span><span class="i">Fuel Available</span></span>
                 </router-link>
             </div>
 
             <div v-if="props.data.role==='super_admin' || props.data.role === 'admin'" class="nav-content">
                 <router-link to="/dashboard/create-product">
-                    <span><span class="i1 fas fa-file"></span><span class="i">Create Product</span></span>
+                    <span><span class="i1 fas fa-file"></span><span class="i">Create Cooking Fuel</span></span>
                 </router-link>
             </div>
             <div class="nav-content" v-if="props.data.role==='super_admin'">
@@ -63,13 +63,19 @@ const props = defineProps({
             <div class="nav-content" v-if="props.data.role==='super_admin' || props.data.role === 'admin'">
                 <router-link to="/dashboard/all-product">
 
-                    <span><span class="i1 fas fa-users"></span><span class="i">All Product</span></span>
+                    <span><span class="i1 fas fa-users"></span><span class="i">All Cooking Fuel</span></span>
                 </router-link>
             </div>
-            <div class="nav-content" v-if="props.data.role==='super_admin' || props.data.role === 'admin'">
+            <div class="nav-content" v-if="props.data.role==='super_admin'">
                 <router-link to="/dashboard/users">
 
                     <span><span class="i1 fas fa-users"></span><span class="i">Users</span></span>
+                </router-link>
+            </div>
+            <div class="nav-content">
+                <router-link to="/dashboard/ai">
+
+                    <span><span class="i1 fas fa-users"></span><span class="i">AI Model</span></span>
                 </router-link>
             </div>
             <div class="nav-content">
@@ -93,7 +99,7 @@ const props = defineProps({
 
 <style scoped>
 .logout{
-    margin-top: 170px;
+    margin-top: 100px;
 }
 .i{
     padding-left: 5px;

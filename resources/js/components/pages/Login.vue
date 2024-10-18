@@ -57,13 +57,12 @@ export default {
                     email: email.value,
                     password: password.value
                 });
-
-
-
+                if(response.status===200 || response.status===201){
                 localStorage.setItem('token', response.data.message.data.token);
                 localStorage.setItem('role', response.data.message.data.role);
                 console.log(response.data.message.data)
                  window.location.replace('/dashboard');
+                }
             } catch (err) {
                 error.value = err.response?.data.message || 'Login failed. Please try again.';
                 console.error(err);

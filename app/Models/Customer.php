@@ -17,6 +17,10 @@ class Customer extends Model
         'name',
         'phone',
         'email',
+        'conversation_stage',
+        'message_json',
+        'questions_json',
+        'current_question_index'
     ];
 
 

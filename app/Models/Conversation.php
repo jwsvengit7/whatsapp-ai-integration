@@ -15,7 +15,10 @@ class Conversation extends Model
         'customer_id',
         'message',
         'is_from_customer',
-        'date'
+        'status',
+        'timestamp',
+        'date',
+        'message_date'
     ];
 
 

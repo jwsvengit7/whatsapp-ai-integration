@@ -15,7 +15,7 @@
                     <span class="fa fa-users size"></span>
 
                     <span class="nu">11</span>
-                    <span class="text">Total Customers</span>
+                    <span class="text">Total Users</span>
 
                 </div>
                 <div class="box">

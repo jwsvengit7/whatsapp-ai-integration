@@ -22,7 +22,7 @@
 
                         <td>{{ item.phone }}</td>
                         <td>{{ utils.getDateFormat(item.created_at) }}</td>
-                        <td><button style="background: none;border: 0 none;outline: none;cursor: pointer"><b>Conversations</b></button></td>
+                        <td><button style="background: none;border: 0 none;outline: none;cursor: pointer" onclick="window.location.href='view-conversations'"><b>Conversations</b></button></td>
                     </tr>
                     <tr v-if="loading">
                         <td colspan="5">Loading...</td>

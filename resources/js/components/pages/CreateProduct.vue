@@ -2,7 +2,7 @@
     <div class="dashboard">
         <AppSidebar :data="user" />
         <main>
-            <AppHeader text="Create Product" :data="user" />
+            <AppHeader text="Create Cooking Fuel" :data="user" />
             <div class="box-container">
                 <p v-if="user">Welcome, {{ user.name }}!</p>
                 <p v-else>Please log in to access features.</p>
@@ -21,7 +21,6 @@
                         </div>
                         <div class="information">
                             <label>Image&nbsp;<span>*</span></label>
-                            <!-- Preview the image before submission -->
                             <img v-if="previewImage" :src="previewImage" alt="Preview Image" style="max-width: 200px; margin-top: 10px;"/>
                             <label for="hide" class="hide">Upload File</label>
                             <input type="file" @change="onImageChange" style="display: none" id="hide"/>
@@ -72,16 +71,14 @@ export default {
 
         const adminFields = ref([
             { text: 'Product Name', model: name, type: 'text', name: 'name' },
-            { text: 'Product Price', model: price, type: 'text', name: 'price' },
-            { text: 'Product Rate', model: rate, type: 'text', name: 'rate' },
         ]);
 
-        // Handle the image file change
+
         const onImageChange = (event) => {
             const file = event.target.files[0];
             if (file) {
-                image.value = file; // Store the file
-                previewImage.value = URL.createObjectURL(file); // Preview the image
+                image.value = file;
+                previewImage.value = URL.createObjectURL(file);
             }
         };
 
@@ -89,14 +86,11 @@ export default {
             loadings.value = true;
             errors.value = '';
 
-            // Use FormData for multipart form submission
             const formData = new FormData();
             formData.append('description', description.value);
             formData.append('name', name.value);
-            formData.append('price', price.value);
-            formData.append('rate', rate.value);
             if (image.value) {
-                formData.append('image', image.value); // Append image if available
+                formData.append('image', image.value);
             }
 
             try {
@@ -122,7 +116,7 @@ export default {
                     icon: 'success',
                     confirmButtonText: 'Okay'
                 });
-                await router.push('/dashboard/users');
+                await router.push('/dashboard/all-product');
             } else {
                 await showError('An unexpected error occurred.');
             }
@@ -157,8 +151,8 @@ export default {
             errors,
             adminFields,
             createNewAdmin,
-            onImageChange, // For handling image change
-            previewImage, // For displaying the image preview
+            onImageChange,
+            previewImage,
             user,
         };
     }

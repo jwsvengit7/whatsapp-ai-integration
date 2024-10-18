@@ -30,6 +30,11 @@ class ProductController extends BaseController
         return $this->service->addProduct($request);
     }
 
+    public function deleteProduct(Request $request) :JsonResponse
+    {
+        return $this->service->deleteProduct($request);
+    }
+
     /**
      * Handle user login.
      * @return JsonResponse
@@ -37,6 +42,11 @@ class ProductController extends BaseController
     public function fetchProduct(): JsonResponse
     {
         return $this->service->fetchProduct();
+    }
+
+
+    public function updateProduct(Request $request): JsonResponse{
+        return $this->service->updateProduct($request);
     }
 
 

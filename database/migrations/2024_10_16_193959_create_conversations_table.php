@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conversations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('customer_id')->constrained();
-            $table->text('message');
-            $table->boolean('is_from_customer');
-            $table->timestamps();
+        Schema::table('conversations', function (Blueprint $table) {
+
             $table->string('message_date')->nullable();
             $table->string('status')->nullable();
 

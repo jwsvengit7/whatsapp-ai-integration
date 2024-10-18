@@ -13,6 +13,9 @@ import Users from "./components/pages/Users.vue";
 import Settings from "./components/pages/Settings.vue";
 import ChangePassword from "./components/pages/ChangePassword.vue";
 import AllProduct from "./components/pages/AllProduct.vue";
+import AI_Model from "./components/pages/AI_Model.vue";
+import EducateAI from "./components/pages/EducateAI.vue";
+import Conversations from "./components/pages/Conversations.vue";
 
 const routes = [
     { path: '/', component: Home, name: 'Home' },
@@ -30,6 +33,9 @@ const routes = [
     { path: '/dashboard/add-admin', component: AddAdmin, name: 'AddAdmin' },
     { path: '/dashboard/create-product', component: CreateProduct, name: 'CreateProduct' },
     { path: '/dashboard/all-product', component: AllProduct, name: 'AllProduct' },
+    { path: '/dashboard/ai', component: AI_Model, name: 'AI_MODEL' },
+    { path: '/dashboard/educate-ai', component: EducateAI, name: 'EducateAI' },
+    { path: '/dashboard/view-conversations', component: Conversations, name: 'Conversations' },
 ];
 
 const router = createRouter({

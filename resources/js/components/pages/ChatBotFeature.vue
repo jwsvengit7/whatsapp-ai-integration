@@ -2,7 +2,7 @@
     <div class="dashboard">
         <AppSidebar :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Product Feature" :data="user"></AppHeader>
+            <AppHeader text="Fuel Feature" :data="user"></AppHeader>
             <div class="box-container">
                 <Feature :data="allProduct"></Feature>
             </div>

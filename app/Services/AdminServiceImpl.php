@@ -25,9 +25,7 @@ class AdminServiceImpl implements AdminService
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
-            'rate' => 'nullable|numeric|min:0|max:5',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -49,15 +47,26 @@ class AdminServiceImpl implements AdminService
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('images', 'public');
         }
+        $questions = [
+            "What is the warranty period for this product?",
+            "Is this product available in other colors?",
+            "Does the product support international shipping?"
+        ];
+
+
 
         $product = Product::create([
             'name' => $request->input('name'),
-            'price' => $request->input('price'),
             'description' => $request->input('description'),
-            'rate' => $request->input('rate'),
             'image' => $imagePath,
             'user_id' => $user->id,
         ]);
+        // Iterate over each question and create a new ProductQuestion
+        foreach ($questions as $question) {
+            $product->questions()->create([
+                'question' => $question,
+            ]);
+        }
 
         return ResponseUtils::respondWithSuccess(['product' => $product], 201);
     }
@@ -111,6 +120,7 @@ class AdminServiceImpl implements AdminService
                 'role' => $request->input('role'),
                 'status' => Status::ACTIVE->value,
                 'otp'=>"1234",
+                'image'=> 'user/default.png',
                 'otp_date' => now(),
                 'password' => $request->input('password'),
             ]);

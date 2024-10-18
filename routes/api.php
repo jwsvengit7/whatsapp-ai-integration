@@ -48,5 +48,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
 
     Route::get('/fetch-product', [ProductController::class, 'fetchProduct']);
     Route::post('/add-product', [ProductController::class, 'addProduct']);
+    Route::put("/update-product",[ProductController::class,'updateProduct']);
+    Route::delete("/delete-product",[ProductController::class,'deleteProduct']);
 
 });

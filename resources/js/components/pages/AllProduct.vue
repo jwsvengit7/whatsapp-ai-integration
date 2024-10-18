@@ -2,7 +2,7 @@
     <div class="dashboard">
         <AppSidebar :data="user"></AppSidebar>
         <main>
-            <AppHeader text="All Product" :data="user"></AppHeader>
+            <AppHeader text="All Cooking Fuel" :data="user"></AppHeader>
             <div class="box-container">
                 <!-- User Table -->
                 <table class="user-table">
@@ -10,8 +10,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
-                        <th>Rate</th>
-                        <th>Price</th>
+                        <th>Questions</th>
                         <th>Date Joined</th>
                         <th>Action</th>
                     </tr>
@@ -20,12 +19,11 @@
                     <tr v-for="(item, index) in allProduct" :key="index">
                         <td>{{ index+1 }}</td>
                         <td>    <div style="display: flex;align-items: center"><img :src="utils.getImage(item.image)" alt=""  style="width:35px;height: 35px;border-radius: 30px"/>&nbsp;{{ item.name }}</div></td>
-                        <td>{{ item.rate }}</td>
-                        <td><span style="text-decoration: line-through;">N</span>{{ item.price }}</td>
-                        <td>{{ utils.getDateFormat(item.created_at) }}</td>
-                        <td><button class="but">Delete</button>
 
-                            <button class="but">Edit</button></td>
+                        <td>Total Questions: {{ item.questions.length }}</td>
+                        <td>{{ utils.getDateFormat(item.created_at) }}</td>
+                        <td><button  class="but" @click="deleteProduct(item.id)">Delete</button>
+                            <button class="but" @click="editProduct(item.name)">Edit</button></td>
                     </tr>
                     <tr v-if="loading">
                         <td colspan="6">Loading...</td>
@@ -49,6 +47,9 @@ import {useUser} from "../composables/useUser.js";
 import {onMounted, ref} from "vue";
 import pic from "../../../../public/images/1723524642068.jpeg";
 import Utils from "../../Utils.js";
+import axios from "../../axios.js";
+import Swal from "sweetalert2";
+import {useRouter} from "vue-router";
 
 export default {
     name: 'AllProduct',
@@ -58,7 +59,17 @@ export default {
         }
     },
     components: { AppHeader, AppSidebar},
+    methods: {
+        editProduct(name) {
+            // Use Vue Router to navigate to the edit page
+            this.$router.push("educate-ai?name="+name);
+        }
+    },
     setup() {
+        const router = useRouter();
+        const loadings = ref(false);
+        const errors = ref('');
+
         const { loadUser,loadAllProduct,allProduct, user, loading, error } = useUser();
 
         const utils = new Utils();
@@ -66,8 +77,57 @@ export default {
             loadUser();
             loadAllProduct();
         });
+        const deleteProduct = async (id) =>{
 
-        return { allProduct,user, loading, error ,utils};
+                loadings.value = true;
+                errors.value = '';
+
+
+                try {
+                    const response = await axios.delete('/delete-product?id='+id
+                    );
+
+                    await handleResponse(response);
+                } catch (error) {
+                    handleError(error);
+                } finally {
+                    loadings.value = false;
+                }
+            };
+
+            const handleResponse = async (response) => {
+                if ([200, 201].includes(response.status)) {
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'Product Delete successfully',
+                        icon: 'success',
+                        confirmButtonText: 'Okay'
+                    });
+                     window.location.replace('all-product');
+                } else {
+                    await showError('An unexpected error occurred.');
+                }
+            };
+
+            const handleError = (error) => {
+                const errorMessage = error.response?.data?.message || 'An error occurred. Please try again.';
+                const validationErrors = error.response?.data?.errors || {};
+
+                errors.value = Object.values(validationErrors).flat()[0] || errorMessage;
+                showError(errors.value);
+            };
+
+            const showError = async (message) => {
+                await Swal.fire({
+                    title: 'Error!',
+                    text: message,
+                    icon: 'error',
+                    confirmButtonText: 'Okay'
+                });
+            };
+
+
+        return { allProduct,user, loading, error,deleteProduct ,utils};
     }
 };
 </script>

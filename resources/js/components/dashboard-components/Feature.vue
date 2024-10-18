@@ -20,12 +20,8 @@ const props = defineProps({
         <p>{{item.name}}</p>
         <img :src="utils.getImage(item.image)"  alt="" />
         <p class="p"><span style="text-decoration: line-through;">N</span>{{item.price}}</p>
-        <button>Sell</button>
-
-
+            <button onclick="window.location.href='account/add-product'">Add Product</button>
     </div>
-
-
 
 
 </div>

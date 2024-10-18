@@ -14,6 +14,8 @@ class VendorProduct extends Model
     protected $fillable = [
         'vendor_id',
         'product_id',
+        'price',
+        'rate',
         'is_vendor',
         'date'
     ];
