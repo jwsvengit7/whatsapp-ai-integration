@@ -12,7 +12,7 @@ const props = defineProps({
     },
 
     func:{
-        type:Function,
+        type:function(){},
     }
 },
 
