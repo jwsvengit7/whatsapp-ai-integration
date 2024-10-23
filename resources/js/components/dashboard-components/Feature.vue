@@ -14,9 +14,7 @@ const props = defineProps({
     func:{
         type:function(){},
     }
-},
-
-);
+});
 
 </script>
 <template>
