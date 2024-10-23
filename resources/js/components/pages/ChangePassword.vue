@@ -18,7 +18,7 @@
                             id="email"
                             v-model="password"
                             autocomplete="off"
-                            placeholder=""
+                            placeholder="New Password"
                             maxlength="100"
                             class="el-input__inner"
                             required
@@ -32,6 +32,7 @@
                             type="password"
                             id="email"
                             v-model="cpassword"
+                            placeholder="Confirm Password"
                             autocomplete="off"
                             maxlength="100"
                             class="el-input__inner"
@@ -54,6 +55,7 @@ import HeaderAuth from "../tools/HeaderAuth.vue";
 import Sidebar from "../tools/Sidebar.vue";
 import Preloader from "../tools/preloader.vue";
 import axios from "../../axios.js";
+import Swal from "sweetalert2";
 
 
 export default {
@@ -98,10 +100,35 @@ export default {
             }
         },
 
-        async change(){
+        async change() {
+            this.loading = true;
+            this.error = '';
+            if(this.password!==this.cpassword){
+                await Swal.fire({
+                    title: 'Error!',
+                    text: "Password does not match",
+                    icon: 'error',
+                    confirmButtonText: 'Okay'
+                });
+            }
+            try {
+                const response = await axios.post('/change-password', {
+                    password: this.password
+                });
+                if (response.status === 200 || response.status === 201) {
+                    console.log(response.data.message.data)
+                    window.location.replace('/login');
+                }
+            } catch (err) {
+                this.error = err.response?.data.message || 'Login failed. Please try again.';
+                console.error(err);
+            } finally {
+                this.loading = false;
+            }
 
+        },
         }
-    }
+
 };
 </script>
 

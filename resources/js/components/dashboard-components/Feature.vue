@@ -6,21 +6,26 @@ import Utils from "../../Utils.js";
 const utils=new Utils();
 const props = defineProps({
 
-
     data: {
         type: {},
         required: true
     },
 
-});
+    func:{
+        type:Function,
+    }
+},
+
+);
+
 </script>
 <template>
 <div class="box-div">
     <div class="box" v-for="(item, index) in props.data" :key="index">
         <p>{{item.name}}</p>
         <img :src="utils.getImage(item.image)"  alt="" />
-        <p class="p"><span style="text-decoration: line-through;">N</span>{{item.price}}</p>
-            <button onclick="window.location.href='account/add-product'">Add Product</button>
+        <p class="p"></p>
+            <button @click="props.func">Add Product</button>
     </div>
 
 
@@ -47,11 +52,10 @@ const props = defineProps({
     flex-direction: column;
     align-items: center;
     button{
-        width: 70px;
-        height: 35px;
         color: white;
+        padding: 10px;
         font-weight: bold;
-        border: 0px none;
+        border: 0 none;
         border-radius: 30px;
         background: #007bff;
     }
@@ -62,9 +66,8 @@ const props = defineProps({
     }
 }
 .box .p{
-        font-weight: bold;
+    font-weight: bold;
     font-size: 20px;
     }
-
 
 </style>

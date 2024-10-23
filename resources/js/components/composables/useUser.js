@@ -21,6 +21,14 @@ export const useUser = () => {
         console.log("All users data loaded:", store.allUsers);
     };
 
+    const loadAllConversation = async (id) => {
+        loading.value = true;
+        const token = localStorage.getItem("token");
+        await store.loadAllConversation(token,id);
+        loading.value = false;
+        console.log("All users data loaded:", store.allUsers);
+    };
+
     const loadAllCustomers = async () => {
         loading.value = true;
         const token = localStorage.getItem("token");
@@ -40,7 +48,8 @@ export const useUser = () => {
     const allUsers = computed(() => store.allUsers);
     const allCustomers = computed(() => store.allCustomer);
     const allProduct = computed(() => store.allProduct);
+    const allConversation = computed(() => store.allConversations);
     const error = computed(() => store.error);
 
-    return { loadUser,loadAllUsers,loadAllCustomers,loadAllProduct, user,allUsers,allCustomers,allProduct, loading, error };
+    return { loadUser,loadAllUsers,loadAllCustomers,loadAllProduct,loadAllConversation,allConversation, user,allUsers,allCustomers,allProduct, loading, error };
 };

@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('conversations', function (Blueprint $table) {
-
-            $table->string('chat_branch')->nullable();
-
+        Schema::table('customers', function (Blueprint $table) {
+            $table->string('location')->nullable();
         });
     }
 
@@ -23,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('conversations');
+        Schema::table('customers', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -29,6 +29,11 @@ class UserController extends BaseController
     {
         return $this->service->userSignup($request);
     }
+    public function refererLink($link)
+    {
+        return $this->service->refererLink($link);
+
+    }
 
     /**
      * Handle user login.
@@ -94,4 +99,5 @@ class UserController extends BaseController
     {
         return $this->service->getUserById();
     }
+
 }

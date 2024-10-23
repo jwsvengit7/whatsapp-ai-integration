@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conversations', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-
+        Schema::table('customers', function (Blueprint $table) {
+            $table->string('message_branch')->nullable();
+            $table->string('product_branch')->nullable();
         });
     }
 
@@ -23,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('conversations');
+        Schema::table('customers', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -7,7 +7,6 @@ use App\Helpers\ImageGenerator;
 use App\Models\Conversation;
 use App\Models\Customer;
 use App\Models\Product;
-use App\Models\ProductQuestion;
 use Exception;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Foundation\Application;
@@ -70,8 +69,8 @@ class WhatsappService
                             $from = $message['from'] ?? null;
 
                             if ($interactive && $interactive['type'] === 'button_reply') {
-                                $buttonId = $interactive['button_reply']['id']; // The ID of the button clicked
-                                $buttonTitle = $interactive['button_reply']['title']; // The title of the button clicked
+                                $buttonId = $interactive['button_reply']['id'];
+                                $buttonTitle = $interactive['button_reply']['title'];
 
                                 Log::info('Button clicked:', [
                                     'from' => $from,
@@ -88,7 +87,6 @@ class WhatsappService
                                 $incomingMessage = $message['text']['body'];
                                 Log::info('Incoming message:', ['from' => $from, 'message' => $incomingMessage]);
 
-                                // Process the incoming text message
                                 $customer = $this->findCustomerByPhone($from);
                                 if (!$customer) {
                                     $this->saveCustomerInformation($from);
@@ -242,11 +240,10 @@ class WhatsappService
      */
     protected function handleConversation(Customer $customer, string $incomingMessage): void {
         try {
-            $stage = $customer->conversation_stage ?? 0; // Default to 0
+            $stage = $customer->conversation_stage ?? 0;
             $conversation_data = $customer->message_json ?? "";
 
             switch ($stage) {
-                // Step 1: Hardcoded questions
                 case 0:
                     $this->sendMessage($customer->phone, "What is your name?", $customer->id, []);
                     $customer->update(['conversation_stage' => 1]);
@@ -254,12 +251,18 @@ class WhatsappService
 
                 case 1:
                     $conversation_data .= "Name: $incomingMessage\n";
+                    $customer->name = $incomingMessage;
+                    $customer->save();
+                    $this->saveMessage($customer->id, $incomingMessage, "received",time());
+
                     $this->sendMessage($customer->phone, "Where are you chatting from?", $customer->id, []);
                     $customer->update(['conversation_stage' => 2, "message_json" => $conversation_data]);
                     break;
 
                 case 2:
                     $conversation_data .= "Location: $incomingMessage\n";
+                    $customer->location = $incomingMessage;
+                    $customer->save();
                     $products = Product::all();
                     $buttons = [];
 
@@ -272,6 +275,7 @@ class WhatsappService
                             ],
                         ];
                     }
+                    $this->saveMessage($customer->id, $incomingMessage, "received",time());
 
                     $this->sendMessage($customer->phone, "What type of stove do you use?", $customer->id, $buttons);
                     $customer->update(['conversation_stage' => 3, "message_json" => $conversation_data]);
@@ -281,6 +285,7 @@ class WhatsappService
 
                     $productName = Product::where("id", $incomingMessage)->first()->name;
                     $conversation_data .= "Selected Product Name: $productName\n";
+                    $this->saveMessage($customer->id, $productName, "received",time());
                     $customer->update(['selected_product_id' => $incomingMessage, "message_json" => $conversation_data]);
 
                     $questions = $this->loadProductQuestions($incomingMessage);
@@ -317,6 +322,7 @@ class WhatsappService
                             $question = $questions[$currentQuestionIndex - 1]['question'];
                             $conversation_data .= "$question: $incomingMessage\n";
                         }
+                        $this->saveMessage($customer->id, $incomingMessage, "received",time());
 
                         $nextQuestion = $questions[$currentQuestionIndex]['question'];
                         $this->sendMessage($customer->phone, $nextQuestion, $customer->id, []);
@@ -329,6 +335,7 @@ class WhatsappService
                     } else {
 
                         $conversation_data .= "$incomingMessage\n";
+                        $this->saveMessage($customer->id, $incomingMessage, "received",time());
                         $aiMessage = $this->generateAIResponse($conversation_data);
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                         $image =$this->imageGenerator->createStyledCalendarImage("2024","12",$aiMessage);
@@ -351,8 +358,8 @@ class WhatsappService
         }
     }
 
-    protected function loadProductQuestions($productId): array {
-        return ProductQuestion::where('product_id', $productId)->select('question')->get()->toArray();
+    protected function loadProductQuestions($product): array {
+        return Product::where('product_id', $product)->select('question')->get()->toArray();
     }
 
 

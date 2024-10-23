@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Random\RandomException;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -59,44 +60,43 @@ class UserServiceImpl implements UserService
      */
     protected function saveUser(Request $request, string $otp): void
     {
-        try {
 
+            CustomerUtils::sendOTEmail($request->input('email'), $otp, $request->input('name'));
             User::create([
                 'email' => $request->input('email'),
                 'phone' => $request->input('phone'),
                 'name' => $request->input('name'),
+                'myref' => $request->input('referer'),
+                'link' => CustomerUtils::generateReferLink(),
                 'role' => $request->input('role'),
                 'status' => Status::INACTIVE->value,
                 'otp' => $otp,
                 'otp_date' => now(),
-                'image'=> 'user/default.png',
+                'image' => 'user/default.png',
                 'password' => $request->input('password'),
             ]);
-            CustomerUtils::sendOTEmail($request->input('email'), $otp, $request->input('name'));
-        } catch (Exception $e) {
-            throw new Exception('Failed to save User: ' . $e->getMessage());
-        }
+
     }
 
 
     public function getUserById(): JsonResponse
     {
         try {
-           $user= CustomerUtils::getJWTUser();
+            $user = CustomerUtils::getJWTUser();
             return ResponseUtils::respondWithSuccess(
                 $user, Response::HTTP_OK);
 
-        } catch (ModelNotFoundException $e) {
-            return ResponseUtils::respondWithError('User not found',
-                Response::HTTP_NOT_FOUND);
-        } catch (Exception $e) {
+        } catch (Exception | ModelNotFoundException $e) {
             Log::error('Failed to fetch User: ' . $e->getMessage());
-            return ResponseUtils::respondWithError('An error occurred while fetching the User',
+            return ResponseUtils::respondWithError($e->getMessage(),
                 Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function userLogin(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -132,7 +132,7 @@ class UserServiceImpl implements UserService
 
     public function changePassword(Request $request): JsonResponse
     {
-        return ResponseUtils::respondWithSuccess("", 7);
+        return ResponseUtils::respondWithSuccess("Password change successfully", Response::HTTP_OK);
     }
 
 
@@ -148,9 +148,7 @@ class UserServiceImpl implements UserService
             if ($user->otp_date->addMinutes(5) < now()) {
                 return ResponseUtils::respondWithError('OTP has expired', Response::HTTP_CONFLICT);
             }
-
             if ($user->status === Status::INACTIVE && $user->status !== Status::DELETED) {
-
                 $user->status = Status::ACTIVE->value;
                 $user->save();
                 return ResponseUtils::respondWithSuccess($user, Response::HTTP_OK);
@@ -165,13 +163,12 @@ class UserServiceImpl implements UserService
     {
 
         try {
-            $userAuth= CustomerUtils::getJWTUser();
-            if($userAuth->email===$req->input("email")){
+            $userAuth = CustomerUtils::getJWTUser();
+            if ($userAuth->email === $req->input("email")) {
                 return ResponseUtils::respondWithError("User not found.", 404);
             }
 
             $user = $this->findUserByEmail($userAuth->email)->first();
-
             if ($user == null) {
                 return ResponseUtils::respondWithError('User not found ', Response::HTTP_NOT_FOUND);
             }
@@ -183,10 +180,10 @@ class UserServiceImpl implements UserService
                 $user->name = $req->input("name");
                 $user->save();
                 return ResponseUtils::respondWithSuccess($user, Response::HTTP_OK);
-            }else{
+            } else {
                 return ResponseUtils::respondWithError("Verify your account", Response::HTTP_BAD_GATEWAY);
             }
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             return ResponseUtils::respondWithError($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -197,14 +194,14 @@ class UserServiceImpl implements UserService
     public function resendVerification(Request $request): JsonResponse
     {
         $user = $this->findUserByEmail($request->input("email"))->first();
-
-
-        if ($user != null) {
+        if ($user) {
+            Log::info('User found: ' . $user->email);
             $otp = CustomerUtils::generateOTP();
-            $user->otp =$otp;
-            $user->otp_date=now();
+            $user->otp = $otp;
+            $user->otp_date = now();
             $user->save();
-                CustomerUtils::sendOTEmail($request->input('email'), $otp, $user->name);
+            Log::info('Customer otp : ' . $otp);
+            CustomerUtils::sendOTEmail($request->input('email'), $otp, $user->name);
 
             return ResponseUtils::respondWithSuccess("OTP resent successfully.", 200);
         } else {
@@ -221,15 +218,15 @@ class UserServiceImpl implements UserService
     public function forgetPassword(Request $request): JsonResponse
     {
         try {
-            $user=$this->findUserByEmail($request->input("email"))->first();
-        if ($user->exists()) {
-            $link = CustomerUtils::generateLink();
-            $user->remember_token=$link;
-            $user->link_expiration=now();
-            $user->save();
-            CustomerUtils::sendLink($user);
-            return ResponseUtils::respondWithSuccess('Link sent successfully to '.$user->email, Response::HTTP_CREATED);
-        }
+            $user = $this->findUserByEmail($request->input("email"))->first();
+            if ($user->exists()) {
+                $link = CustomerUtils::generateLink();
+                $user->remember_token = $link;
+                $user->link_expiration = now();
+                $user->save();
+                CustomerUtils::sendLink($user);
+                return ResponseUtils::respondWithSuccess('Link sent successfully to ' . $user->email, Response::HTTP_CREATED);
+            }
             return ResponseUtils::respondWithError('User not found', Response::HTTP_NOT_FOUND);
 
         } catch (Exception $e) {
@@ -241,7 +238,7 @@ class UserServiceImpl implements UserService
     public function verifyLink($token): JsonResponse
     {
 
-        $user = User::where("remember_token",$token)->first();
+        $user = User::where("remember_token", $token)->first();
 
         if ($user == null) {
             return ResponseUtils::respondWithError('User not found ', Response::HTTP_NOT_FOUND);
@@ -250,8 +247,18 @@ class UserServiceImpl implements UserService
             if ($user->link_expiration->addMinutes(10) < now()) {
                 return ResponseUtils::respondWithError('Link has expired', Response::HTTP_CONFLICT);
             }
-                return ResponseUtils::respondWithSuccess("User", Response::HTTP_OK);
+            return ResponseUtils::respondWithSuccess("User", Response::HTTP_OK);
         }
         return ResponseUtils::respondWithSuccess("Link is invalid", Response::HTTP_CONFLICT);
+    }
+
+    public function refererLink($link): JsonResponse
+    {
+        try {
+            $user = User::where("link", $link)->first();
+            return ResponseUtils::respondWithSuccess($user, Response::HTTP_OK);
+        } catch (Exception $e) {
+            return ResponseUtils::respondWithSuccess($e->getMessage(), Response::HTTP_BAD_GATEWAY);
+        }
     }
 }

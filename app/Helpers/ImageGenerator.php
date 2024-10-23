@@ -4,12 +4,10 @@ class ImageGenerator {
 
     function createStyledCalendarImage($year, $month, $predictions): string
     {
-        // Create a blank image with specified dimensions
         $width = 800;
         $height = 600;
         $image = imagecreatetruecolor($width, $height);
 
-        // Define colors
         $bgColor = imagecolorallocate($image, 255, 255, 255); // White background
         $frameColor = imagecolorallocate($image, 200, 200, 200); // Light grey frame
         $textColor = imagecolorallocate($image, 0, 0, 0); // Black text

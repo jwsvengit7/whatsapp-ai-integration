@@ -34,6 +34,7 @@ class CustomerUtils
             'email' => 'required|email|unique:customers,email',
             'phone' => 'required|string|min:10|unique:customers,phone',
             'name'  => 'required|string|max:255',
+
         ]);
     }
     public  static function validateUserData(Request $request): \Illuminate\Contracts\Validation\Validator
@@ -117,19 +118,32 @@ class CustomerUtils
 
         return $link.time();
     }
+    /**
+     * @throws RandomException
+     */
+    public static function generateReferLink($length = 30): string
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $link = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $link .= $characters[random_int(0, $charactersLength - 1)];
+        }
+
+        return $link;
+    }
 
 
 
-    public static function sendOTEmail($email, $otp,$userName): \Illuminate\Http\JsonResponse
+    public static function sendOTEmail($email, $otp,$userName): void
     {
         Cache::put('otp_' . $email, $otp, now()->addMinutes(10));
-        try {
+        Log::info('sending OTP : ' . $email);
             Mail::to($email)->send(new EmailNotification($otp,$email,$userName));
-            return response()->json(['message' => 'OTP sent successfully']);
-        } catch (\Exception $e) {
-            Log::error('Error sending OTP email: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to send OTP email'.$e->getMessage()], 500);
-        }
+            Log::info('Success Email : ' . $email);
+
+
     }
 
     public static function sendAdminEmail($user,$rawPassword): \Illuminate\Http\JsonResponse
@@ -143,15 +157,14 @@ class CustomerUtils
         }
     }
 
-    public static function sendLink($user): \Illuminate\Http\JsonResponse
+    public static function sendLink($user): void
     {
 
         try {
             Mail::to($user->email)->send(new ResetPasswordNotification($user));
-            return response()->json(['message' => 'Mail sent successfully']);
+            Log::info(' sending Mail : ' . $user->email);
         } catch (\Exception $e) {
             Log::error('Error sending Mail : ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to send Mail email'.$e->getMessage()], 500);
         }
 
     }

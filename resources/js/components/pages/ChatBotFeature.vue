@@ -4,7 +4,7 @@
         <main>
             <AppHeader text="Fuel Feature" :data="user"></AppHeader>
             <div class="box-container">
-                <Feature :data="allProduct"></Feature>
+                <Feature :data="allProduct" :func="addProduct"></Feature>
             </div>
         </main>
     </div>
@@ -22,6 +22,12 @@ import {useUser} from "../composables/useUser.js";
 export default {
     name: 'ChatBotFeature',
     components: {Feature, AppHeader, AppSidebar},
+    methods:{
+        addProduct(){
+            alert(1)
+        }
+
+    },
     setup() {
         const { loadUser, user, loadAllProduct,allProduct,loading, error } = useUser();
 

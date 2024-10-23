@@ -2,7 +2,7 @@
     <div class="dashboard">
         <AppSidebar :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Customers" :data="user"></AppHeader>
+            <AppHeader text="My Customer" :data="user"></AppHeader>
             <div class="box-container">
                 <!-- User Table -->
                 <table class="user-table">
@@ -48,7 +48,7 @@ import pic from "../../../../public/images/1723524642068.jpeg";
 import Utils from "../../Utils.js";
 
 export default {
-    name: 'Users',
+    name: 'MyCustomer',
     computed: {
         pic() {
             return pic

@@ -39,6 +39,15 @@ class AdminController extends BaseController
         return $this->service->fetchAllUsers();
     }
 
+    /**
+     * Fetch a Conversation by ID.
+
+     * @return JsonResponse
+     */
+    public function fetchConversation(Request $request): JsonResponse
+    {
+        return $this->service->fetchConversation($request);
+    }
 
 
 }

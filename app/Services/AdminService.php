@@ -11,4 +11,6 @@ interface AdminService
     public function createAdmin(\Illuminate\Http\Request $request);
 
     public function fetchAllUsers();
+
+    public function fetchConversation(\Illuminate\Http\Request $request);
 }

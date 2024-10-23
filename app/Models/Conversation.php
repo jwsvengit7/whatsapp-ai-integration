@@ -17,6 +17,7 @@ class Conversation extends Model
         'is_from_customer',
         'status',
         'timestamp',
+        'chart_branch',
         'date',
         'message_date'
     ];

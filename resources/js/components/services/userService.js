@@ -23,9 +23,17 @@ export const fetchAllCustomers =async (token)=> {
         }
     });
 }
-    export const fetchAllProduct =async (token)=>{
+export const fetchAllProduct =async (token)=> {
 
-        return await axios.get('/fetch-product', {
+    return await axios.get('/fetch-product', {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+}
+    export const fetchAllConversation =async (token,id)=>{
+
+        return await axios.get('/fetch-chat?id='+id, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

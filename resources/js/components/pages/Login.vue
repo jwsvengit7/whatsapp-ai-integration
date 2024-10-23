@@ -9,7 +9,7 @@
                     <h1>Welcome Back!</h1>
                     <div class="el-form-item">
                         <label for="email" class="el-form-item__label">Email</label>
-                        <input v-model="email" type="text" autocomplete="off" placeholder="name@email.com" maxlength="100" class="el-input__inner" />
+                        <input v-model="email" type="email" autocomplete="off" placeholder="name@email.com" maxlength="100" class="el-input__inner" />
                     </div>
                     <div class="el-form-item">
                         <label for="password" class="el-form-item__label">Password</label>
@@ -65,6 +65,11 @@ export default {
                 }
             } catch (err) {
                 error.value = err.response?.data.message || 'Login failed. Please try again.';
+                if(error.value==="User is inactive Please verify your account"){
+                    localStorage.setItem('email', email.value);
+                    localStorage.setItem('otp_screen', "1");
+                    window.location.replace('/account/verify-otp');
+                }
                 console.error(err);
             } finally {
                 loading.value = false;

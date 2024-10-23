@@ -16,6 +16,7 @@ import AllProduct from "./components/pages/AllProduct.vue";
 import AI_Model from "./components/pages/AI_Model.vue";
 import EducateAI from "./components/pages/EducateAI.vue";
 import Conversations from "./components/pages/Conversations.vue";
+import MyCustomer from "./components/pages/MyCustomer.vue";
 
 const routes = [
     { path: '/', component: Home, name: 'Home' },
@@ -36,6 +37,7 @@ const routes = [
     { path: '/dashboard/ai', component: AI_Model, name: 'AI_MODEL' },
     { path: '/dashboard/educate-ai', component: EducateAI, name: 'EducateAI' },
     { path: '/dashboard/view-conversations', component: Conversations, name: 'Conversations' },
+    { path: '/dashboard/my-customer', component: MyCustomer, name: 'MyCustomer' },
 ];
 
 const router = createRouter({

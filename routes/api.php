@@ -33,7 +33,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::post('/forget-password', [UserController::class, 'forgetPassword']);
     Route::get('/verify-link/{token}', [UserController::class, 'verifyLink']);
-
+    Route::get("/referer-link/{link}",[UserController::class,'refererLink']);
 
 
     // Admin
@@ -41,6 +41,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     Route::post('/create-admin', [AdminController::class, 'createAdmin']);
     Route::get('/all-users', [AdminController::class, 'fetchAllUsers']);
     Route::post('/create-product', [AdminController::class, 'createProduct']);
+    Route::get("fetch-chat",[AdminController::class,"fetchConversation"]);
 
     // Webhook Endpoints
     Route::match(['get', 'post'], '/webhook', [WhatsAppController::class, 'handleWebhook']);
@@ -50,5 +51,6 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     Route::post('/add-product', [ProductController::class, 'addProduct']);
     Route::put("/update-product",[ProductController::class,'updateProduct']);
     Route::delete("/delete-product",[ProductController::class,'deleteProduct']);
+
 
 });

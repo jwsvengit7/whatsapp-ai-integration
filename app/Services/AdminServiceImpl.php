@@ -6,12 +6,14 @@ use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Helpers\CustomerUtils;
 use App\Helpers\ResponseUtils;
+use App\Models\Conversation;
 use App\Models\Product;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
@@ -65,6 +67,7 @@ class AdminServiceImpl implements AdminService
         foreach ($questions as $question) {
             $product->questions()->create([
                 'question' => $question,
+                'product_id' => $product->id,
             ]);
         }
 
@@ -149,4 +152,32 @@ class AdminServiceImpl implements AdminService
                Response::HTTP_INTERNAL_SERVER_ERROR);
        }
     }
+
+    /**
+     * @throws Exception
+     */
+    public function fetchConversation(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $id = $request->query('id');
+        $user = CustomerUtils::getJWTUser();
+
+        if ($user == null) {
+            return ResponseUtils::respondWithError("User not found.", Response::HTTP_NOT_FOUND);
+        }
+
+        if ($user->role == UserRole::SUPER_ADMIN && $user->role == UserRole::ADMIN) {
+            return ResponseUtils::respondWithError("You don't have permissions to access conversations", Response::HTTP_UNAUTHORIZED);
+        }
+        if ($id) {
+            $conversations = Conversation::where("customer_id", $id)->get();
+            if ($conversations->isEmpty()) {
+                return ResponseUtils::respondWithError("Conversations not found.", Response::HTTP_NOT_FOUND);
+            }
+            return ResponseUtils::respondWithSuccess($conversations->toArray(), Response::HTTP_OK);
+        }
+
+        $conversations = Conversation::all();
+        return ResponseUtils::respondWithSuccess($conversations->toArray(), Response::HTTP_OK);
+    }
+
 }

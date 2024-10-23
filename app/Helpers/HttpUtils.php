@@ -5,7 +5,7 @@ class HttpUtils
     public static function URLs():array
     {
         return
-            ['createAccount', 'loginAuth','confirmAccount', 'resendVerification','forgetPassword','verifyLink'];
+            ['createAccount', 'loginAuth','confirmAccount', 'resendVerification','forgetPassword','verifyLink','refererLink'];
 
     }
 
