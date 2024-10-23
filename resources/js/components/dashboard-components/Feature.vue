@@ -10,12 +10,10 @@ const props = defineProps({
         type: {},
         required: true
     },
-
     func:{
         type:function(){},
     }
 });
-
 </script>
 <template>
 <div class="box-div">
@@ -57,7 +55,6 @@ const props = defineProps({
         border-radius: 30px;
         background: #007bff;
     }
-
     img {
         width: 100%;
         height: 100px;
