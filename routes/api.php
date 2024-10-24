@@ -26,7 +26,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     // User Endpoints
     Route::post('/create-user', [UserController::class, 'createAccount']);
     Route::get('/fetch-user', [UserController::class, 'fetchUser']);
-    Route::get('/update-user', [UserController::class, 'updateAccount']);
+    Route::put('/update-user', [UserController::class, 'updateAccount']);
     Route::post('/login', [UserController::class, 'loginAuth']);
     Route::post('/resend', [UserController::class, 'resendVerification']);
     Route::post('/verify-otp', [UserController::class, 'confirmAccount']);

@@ -10,7 +10,7 @@ import {
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        user: {email:"",name:"",phone:"",token:"",status:"",role:"",created_at:"",image:""},
+        user: {email:"",name:"",phone:"",token:"",status:"",role:"",created_at:"",image:"",address:""},
         allUsers:[],
         allCustomer:[],
         allProduct:[],

@@ -22,7 +22,9 @@ class AdminServiceImpl implements AdminService
 {
 
 
-
+    /**
+     * @throws Exception
+     */
     public function createProduct($request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [

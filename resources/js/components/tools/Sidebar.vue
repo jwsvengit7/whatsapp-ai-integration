@@ -17,24 +17,18 @@ import imageBg from '../../../../public/images/img_login_banner_right.929cc6f5.p
                 <div class="quick-row">
                     <img :src="image" alt="Quick Integration" width="25" />
                     <div class="quick">
-                        <p>Quick Integration</p>
-                        <p>Few lines of code, within 30 mins</p>
+                        <p>Quick Response From Kiki AI</p>
+                        <p>Nearby Customer are interested in a verified Vendor</p>
                     </div>
                 </div>
                 <div class="quick-row">
                     <img :src="image" alt="Quick Integration" width="25" />
                     <div class="quick">
-                        <p>Quick Integration</p>
-                        <p>Few lines of code, within 30 mins</p>
+                        <p>BIO-FUEL</p>
+                        <p>Set an affordable price BIO-FUEL</p>
                     </div>
                 </div>
-                <div class="quick-row">
-                    <img :src="image" alt="Quick Integration" width="25" />
-                    <div class="quick">
-                        <p>Quick Integration</p>
-                        <p>Few lines of code, within 30 mins</p>
-                    </div>
-                </div>
+
             </div>
         </div>
         <img :src="imageBg" class="bg-color">

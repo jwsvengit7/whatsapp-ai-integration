@@ -161,22 +161,39 @@ class UserServiceImpl implements UserService
 
     public function updateAccount(Request $req): JsonResponse
     {
+        $validator = Validator::make($req->all(), [
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'phone' => 'required|string|max:255',
+            'email' => 'nullable|string',
+            'status' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+        if ($validator->fails()) {
+            return ResponseUtils::respondWithError($validator->errors(), Response::HTTP_BAD_REQUEST);
+        }
 
         try {
             $userAuth = CustomerUtils::getJWTUser();
-            if ($userAuth->email === $req->input("email")) {
+            Log::info("Data: ", (array)$userAuth);
+
+            if (!isset($userAuth->email) || $userAuth->email !== $req->input("email")) {
                 return ResponseUtils::respondWithError("User not found.", 404);
             }
 
             $user = $this->findUserByEmail($userAuth->email)->first();
             if ($user == null) {
-                return ResponseUtils::respondWithError('User not found ', Response::HTTP_NOT_FOUND);
+                return ResponseUtils::respondWithError('User not found '.$userAuth->email, Response::HTTP_NOT_FOUND);
+            }
+            $imagePath = "user/default.png";
+            if ($req->hasFile('image')) {
+                $imagePath = $req->file('image')->store('images', 'public');
             }
 
-            if ($user->status === Status::INACTIVE && $user->status !== Status::DELETED) {
+            if ($user->status === Status::INACTIVE || $user->status !== Status::DELETED) {
                 $user->phone = $req->input("phone");
                 $user->address = $req->input("address");
-                $user->password = bcrypt($req->input('password'));
+                $user->image= $imagePath ;
                 $user->name = $req->input("name");
                 $user->save();
                 return ResponseUtils::respondWithSuccess($user, Response::HTTP_OK);
