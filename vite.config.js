@@ -4,7 +4,7 @@ import { fileURLToPath, URL } from 'url';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-    base: '/build/',
+    base: 'https://uat.smefunds.com/',
     plugins: [
         laravel({
             input: [
