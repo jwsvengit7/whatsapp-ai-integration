@@ -4,7 +4,6 @@
     # Allow access to assets within the public/build/assets folder
     RewriteCond %{REQUEST_URI} ^/build/assets/
     RewriteRule .* - [L]
-
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
