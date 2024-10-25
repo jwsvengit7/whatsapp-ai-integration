@@ -19,7 +19,7 @@ import Conversations from "./components/pages/Conversations.vue";
 import MyCustomer from "./components/pages/MyCustomer.vue";
 
 const routes = [
-    { path: '/', component: Home, name: 'Home' },
+    { path: '/', component: Login, name: 'Login' },
     { path: '/account/login', component: Login, name: 'Login' },
     { path: '/account/signup', component: Signup, name: 'Signup' },
     { path: '/account/forget-password', component: ForgetPassword, name: 'ForgetPassword' },
