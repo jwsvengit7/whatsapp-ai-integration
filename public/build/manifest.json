@@ -1,17 +1,42 @@
 {
+  "public/images/1723524642068.jpeg": {
+    "file": "assets/1723524642068-DmqcmhBO.jpeg",
+    "src": "public/images/1723524642068.jpeg"
+  },
+  "public/images/download.png": {
+    "file": "assets/download-DQGeouDt.png",
+    "src": "public/images/download.png"
+  },
+  "public/images/fuel.jpeg": {
+    "file": "assets/fuel-JdltAVlF.jpeg",
+    "src": "public/images/fuel.jpeg"
+  },
+  "public/images/img_login_banner_right.929cc6f5.png": {
+    "file": "assets/img_login_banner_right.929cc6f5-XStTiaB9.png",
+    "src": "public/images/img_login_banner_right.929cc6f5.png"
+  },
+  "public/images/kike-logo.png": {
+    "file": "assets/kike-logo-umg12CaK.png",
+    "src": "public/images/kike-logo.png"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-l0sNRNKZ.js",
-    "name": "app",
+    "file": "assets/app-D5YwssPJ.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DJfYB-WR.js",
+    "file": "assets/app-B2l35M62.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-9Woas04I.css"
+      "assets/app-CF7O9U-Q.css"
+    ],
+    "assets": [
+      "assets/kike-logo-umg12CaK.png",
+      "assets/download-DQGeouDt.png",
+      "assets/img_login_banner_right.929cc6f5-XStTiaB9.png",
+      "assets/1723524642068-DmqcmhBO.jpeg"
     ]
   }
 }
