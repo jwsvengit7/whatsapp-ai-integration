@@ -40,5 +40,4 @@ class CustomerController extends BaseController {
         return $this->customerService->fetchAllCustomer();
     }
 
-
 }

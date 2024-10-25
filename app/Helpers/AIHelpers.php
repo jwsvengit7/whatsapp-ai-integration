@@ -6,7 +6,7 @@ class AIHelpers
     public static function AIContext(): string
     {
         return "
-        You are an AI assistant for Kike Fuel, a service specializing in product statistics. Your primary role is to provide accurate predictions  product usage patterns.
+        You are an AI assistant for Kike BIO Fuel, a service specializing in product statistics. Your primary role is to provide accurate predictions  product usage patterns.
 
 Key Instructions:
 
