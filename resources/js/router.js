@@ -17,9 +17,10 @@ import AI_Model from "./components/pages/AI_Model.vue";
 import EducateAI from "./components/pages/EducateAI.vue";
 import Conversations from "./components/pages/Conversations.vue";
 import MyCustomer from "./components/pages/MyCustomer.vue";
+import LoginPage from "./components/pages/LoginPage.vue";
 
 const routes = [
-    { path: '/', component: Login, name: 'Login' },
+    { path: '/', component: LoginPage, name: 'LoginPage' },
     { path: '/account/login', component: Login, name: 'Login' },
     { path: '/account/signup', component: Signup, name: 'Signup' },
     { path: '/account/forget-password', component: ForgetPassword, name: 'ForgetPassword' },

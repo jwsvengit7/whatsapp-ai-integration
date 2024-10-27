@@ -44,7 +44,7 @@
                         </div>
                         <div class="information">
                             <label>Name&nbsp;<span>*</span></label>
-                            <input v-model="user.name" readonly type="text" name="name" required />
+                            <input v-model="user.name"  type="text" name="name" required />
                         </div>
                         <div class="information">
                             <label>Phone&nbsp;<span>*</span></label>
