@@ -15,14 +15,14 @@ import imageBg from '../../../../public/images/img_login_banner_right.929cc6f5.p
             <h2 class="build">Build Powerful Interaction Apps with Voice & Video Chat API</h2>
             <div class="quick-integration">
                 <div class="quick-row">
-                    <img :src="image" alt="Quick Integration" width="25" />
+                    <img src="https://uat.smefunds.com/public/images/download.png" alt="Quick Integration" width="25" />
                     <div class="quick">
                         <p>Quick Response From Kiki AI</p>
                         <p>Nearby Customer are interested in a verified Vendor</p>
                     </div>
                 </div>
                 <div class="quick-row">
-                    <img :src="image" alt="Quick Integration" width="25" />
+                    <img src="https://uat.smefunds.com/public/images/download.png" alt="Quick Integration" width="25" />
                     <div class="quick">
                         <p>BIO-FUEL</p>
                         <p>Set an affordable price BIO-FUEL</p>

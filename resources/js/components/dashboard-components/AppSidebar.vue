@@ -23,7 +23,7 @@ const props = defineProps({
 
 <template>
     <aside>
-        <img :src="logo" width="100">
+        <img src="https://uat.smefunds.com/public/images/kike-logo.png" width="100">
         <nav>
             <div class="nav-content">
                 <router-link to="/dashboard">
