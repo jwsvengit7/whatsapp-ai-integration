@@ -23,7 +23,7 @@ const routes = [
     { path: '/', component: LoginPage, name: 'LoginPage' },
     { path: '/account/login', component: Login, name: 'Login' },
     { path: '/account/signup', component: Signup, name: 'Signup' },
-    { path: '/account/forget-password', component: ForgetPassword, name: 'ForgetPassword' },
+    { path: '/account/forget-password', component: ForgetPassword, name: 'ForgetPassword'},
     { path: '/account/verify-otp', component: VerifyOTP, name: 'VerifyOTP' },
     { path: '/account/change-password', component: ChangePassword, name: 'ChangePassword' },
     // { path: '/dashboard', component: Dashboard, name: 'Dashboard' },

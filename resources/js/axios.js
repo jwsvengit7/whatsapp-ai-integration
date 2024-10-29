@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://localhost:8000/api/v1';
+axios.defaults.baseURL = 'https://uat.smefunds.com/api/v1';
 
 axios.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
