@@ -8,7 +8,7 @@ export default class Utils{
         return dateObj.toLocaleDateString('en-US', options);
    }
     getImage(image){
-        return `http://localhost:8000/storage/${image}`;
+        return `https://uat.smefunds.com/storage/${image}`;
     }
      getRole(role){
         return role.toUpperCase().replaceAll('_',' ')
