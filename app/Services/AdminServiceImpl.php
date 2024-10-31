@@ -47,9 +47,13 @@ class AdminServiceImpl implements AdminService
             return ResponseUtils::respondWithValidationErrors($validator);
         }
 
+        $uploadPath = public_path('images'); // This gets the full path to public/uploads
         $imagePath = null;
+
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images', 'public');
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $imagePath = $image->move($uploadPath, $filename);
         }
         $questions = [
             "What is the warranty period for this product?",
