@@ -72,7 +72,7 @@ class UserServiceImpl implements UserService
                 'status' => Status::INACTIVE->value,
                 'otp' => $otp,
                 'otp_date' => now(),
-                'image' => 'user/default.png',
+                'image' => 'images/default.png',
                 'password' => $request->input('password'),
             ]);
 
@@ -117,8 +117,7 @@ class UserServiceImpl implements UserService
             return ResponseUtils::respondWithError('User is ' . $user->status->value . " Please verify your account", 401);
         }
 
-        $expiresAt = Carbon::now()->addHour()->timestamp;
-
+        $expiresAt = Carbon::now()->addHours(5)->timestamp;
         $customClaims = [
             'email' => $user->email,
             'status' => $user->status,
@@ -185,7 +184,7 @@ class UserServiceImpl implements UserService
             if ($user == null) {
                 return ResponseUtils::respondWithError('User not found '.$userAuth->email, Response::HTTP_NOT_FOUND);
             }
-            $imagePath = "user/default.png";
+            $imagePath = "images/default.png";
             if ($req->hasFile('image')) {
                 $imagePath = $req->file('image')->store('images', 'public');
             }

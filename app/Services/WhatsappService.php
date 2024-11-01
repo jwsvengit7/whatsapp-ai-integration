@@ -112,7 +112,7 @@ class WhatsappService
      * @throws ConnectionException
      * @throws Exception
      */
-    public function sendMessage(string $to, string $message, $id, array $buttons): void {
+    public function sendMessage(string $to, string $message, $id, array $buttons,string $mediaUrl = null): void {
         $url = 'https://graph.facebook.com/v12.0/' . env('WHATSAPP_BUSINESS_ID') . '/messages';
         $token = env('WHATSAPP_API_TOKEN');
 
@@ -120,8 +120,16 @@ class WhatsappService
             'messaging_product' => 'whatsapp',
             'to' => $to
         ];
+        if ($mediaUrl) {
+            // Sending an image
+            $data['type'] = 'image';
+            $data['image'] = [
+                'link' => $mediaUrl,
+                'caption' => $message // Optional: You can add a caption for the image
+            ];
+        }
 
-        if (!empty($buttons)) {
+       elseif (!empty($buttons)) {
             $data['type'] = 'interactive';
             $data['interactive'] = [
                 'type' => 'button',
@@ -244,18 +252,13 @@ class WhatsappService
             $stage = $customer->conversation_stage ?? 0;
             $conversation_data = $customer->message_json ?? "";
 
-            if ($stage === 0 && $customer->conversation_stage) {
-                $this->sendMessage($customer->phone, "You can now schedule a message or chat directly with AI.", $customer->id, []);
 
-                if (strtolower($incomingMessage) === 'chat') {
-                    $aiMessage = $this->generateAIResponse("Direct conversation started.");
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-                    return;
-                } elseif (strtolower($incomingMessage) === 'schedule') {
-                    $this->sendMessage($customer->phone, "What date and time would you like to schedule the message?", $customer->id, []);
-                    $customer->update(['conversation_stage' => 5]); // Stage for scheduling
-                    return;
-                }
+            if($customer->has_completed_onboarding){
+                $this->saveMessage($customer->id, $incomingMessage, "received", time());
+                $aiKnowledge = "Please answer any thing he ask from here: ".$incomingMessage;
+                $aiMessage = $this->generateAIResponse($aiKnowledge);
+                $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
             }
 
             switch ($stage) {
@@ -317,7 +320,7 @@ class WhatsappService
                     } else {
                         $this->sendMessage($customer->phone, "No questions for this product.", $customer->id, []);
                         $customer->update([
-                            'conversation_stage' => 6,  // Proceed to prediction stage
+                            'conversation_stage' => 6,
                             'questions_json' => null,
                             'current_question_index' => null,
                             'message_json' => null,
@@ -346,7 +349,7 @@ class WhatsappService
                             'message_json' => $conversation_data,
                         ]);
                     } else {
-                        $customer->update(['conversation_stage' => 6]); // Proceed to prediction stage
+                        $customer->update(['conversation_stage' => 6]);
                         $this->handleConversation($customer, $incomingMessage);
                     }
                     break;
@@ -357,8 +360,9 @@ class WhatsappService
 
                     $aiMessage = $this->generateAIResponse($conversation_data);
                     $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+                   $image= $this->imageGenerator->createStyledCalendarImage("2024-10-23","10:45pm",[]);
+                    $this->sendMessage($customer->phone, "Now you can schedule a message. What date and time would you like?", $customer->id, [],$image);
 
-                    $this->sendMessage($customer->phone, "Now you can schedule a message. What date and time would you like?", $customer->id, []);
                     $customer->update([
                         'conversation_stage' => 5,
                         'questions_json' => null,
@@ -370,9 +374,10 @@ class WhatsappService
                 case 5:
                     $conversation_data .= "Scheduled Message: $incomingMessage\n";
                     $this->saveMessage($customer->id, $incomingMessage, "scheduled", time());
-                    $this->sendMessage($customer->phone, "Message scheduled successfully.", $customer->id, []);
+                    $this->sendMessage($customer->phone, "Message scheduled successfully.", $customer->id, [],);
 
                     $customer->update([
+                        'has_completed_onboarding'=>true,
                         'conversation_stage' => 0,
                         'message_json' => null,
                     ]);
@@ -393,15 +398,12 @@ class WhatsappService
     }
 
     protected function loadProductQuestions($productId): array {
-        // Fetch the product by ID
+
         $product = Product::where('id', $productId)->first();
 
-        // If the product is not found, return an empty array
         if (!$product) {
             return [];
         }
-
-        // Fetch and return the questions related to the found product
         return ProductQuestion::where('product_id', $product->id)->get()->toArray();
     }
 

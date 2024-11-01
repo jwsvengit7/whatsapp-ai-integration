@@ -11,7 +11,10 @@ return [
     | framework needs to place the application's name in a notification or
     | other UI elements where an application name needs to be displayed.
     |
-    */
+   */
+
+
+
 
     'name' => env('APP_NAME', 'Laravel'),
 
@@ -122,5 +125,14 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+//        'providers' => [
+//        Intervention\Image\ImageServiceProvider::class,
+//    ],
+//
+//    'aliases' => [
+//        'Image' => Intervention\Image\Facades\Image::class,
+//    ],
+
 
 ];

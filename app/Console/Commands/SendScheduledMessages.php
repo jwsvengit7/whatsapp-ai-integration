@@ -1,6 +1,5 @@
 <?php
 
-// app/Console/Commands/SendScheduledMessages.php
 
 namespace App\Console\Commands;
 

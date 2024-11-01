@@ -126,7 +126,7 @@ class AdminServiceImpl implements AdminService
                 'role' => $request->input('role'),
                 'status' => Status::ACTIVE->value,
                 'otp'=>"1234",
-                'image'=> 'user/default.png',
+                'image'=> 'images/default.png',
                 'otp_date' => now(),
                 'password' => $request->input('password'),
             ]);
