@@ -19,7 +19,8 @@ const props = defineProps({
 <div class="box-div">
     <div class="box" v-for="(item, index) in props.data" :key="index">
         <p>{{item.name}}</p>
-        <img :src="utils.getImage(item.image)"  alt="" />
+<!--        <img :src="utils.getImage(item.image)"  alt="" /> -->
+        <img src="https://uat.smefunds.com/public/images/kike-logo.png"  alt="" />
         <p class="p"></p>
             <button @click="props.func">Add Product</button>
     </div>
