@@ -394,12 +394,9 @@ class WhatsappService
         // Fetch the product by ID
         $product = Product::where('product_id', $productId)->first();
 
-        // If the product is not found, return an empty array
         if (!$product) {
             return [];
         }
-
-        // Fetch and return the questions related to the found product
         return ProductQuestion::where('product_id', $product->id)->get()->toArray();
     }
 
