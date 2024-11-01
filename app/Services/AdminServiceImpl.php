@@ -187,27 +187,43 @@ class AdminServiceImpl implements AdminService
     {
 
         $validator = Validator::make($request->all(), [
-            'customer_id' => 'required|exists:customers,id',
-            'message_content' => 'required|string',
-            'scheduled_date' => 'required|date|after:today',
-        ]);
 
-        if ($validator->fails()) {
+            'message_content' => 'required|string',
+            'scheduled_date' => 'required|date',
+        ]);
+        try{
+            $user= CustomerUtils::getJWTUser();
+
+
+            if ($validator->fails()) {
             return ResponseUtils::respondWithValidationErrors($validator);
+        }
+        if ($user->role == UserRole::SUPER_ADMIN && $user->role == UserRole::ADMIN) {
+            return ResponseUtils::respondWithError("You don't have permissions to access conversations", Response::HTTP_UNAUTHORIZED);
+        }
+        $product = Product::where("name",$request->input("product_name"))->first();
+        if($product==null){
+            return ResponseUtils::respondWithError(
+"Product does not found"
+                , Response::HTTP_NOT_FOUND);
         }
 
 
         $scheduledMessage = ScheduledMessage::create([
-            'customer_id' => $request->input( 'customer_id'),
+            'product_id' => $product->id,
             'message_content' => $request->input('message_content'),
             'scheduled_date' => $request->input('scheduled_date'),
             'status' => 'pending',
         ]);
 
-        return response()->json([
-            'message' => 'Message scheduled successfully.',
-            'scheduledMessage' => $scheduledMessage
-        ], 201);
-    }
+        return ResponseUtils::respondWithSuccess(
 
-}
+             $scheduledMessage
+        , Response::HTTP_OK);
+    } catch (Exception $e) {
+            return ResponseUtils::respondWithError($e->getMessage(),
+                Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        }
+
+    }

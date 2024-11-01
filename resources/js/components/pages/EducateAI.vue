@@ -54,6 +54,7 @@
 
                                 <label for="scheduledTime" class="input-label">Schedule Time</label>
                                 <input type="datetime-local" v-model="scheduledTime" class="text-input" />
+                                <button type="button" @click="add" class="add-question-button">Add Question</button>
                             </div>
                         </div>
                     </div>
@@ -361,20 +362,26 @@ export default {
                 const response = await axios.put('/update-product', data);
                 await handleResponse(response);
 
-                if (scheduledMessage.value && scheduledTime.value) {
-                    const data =   await axios.post('/schedule-message', {
-                        message: scheduledMessage.value,
-                        time: scheduledTime.value
-                    });
-                    await handleResponse(data);
 
-                }
             } catch (error) {
                 handleError(error);
             } finally {
                 loadings.value = false;
             }
         };
+        const add =  async () => {
+            const datas ={
+                message_content: scheduledMessage.value,
+                scheduled_date: scheduledTime.value,
+                product_name:id.value
+
+            };
+            console.log(datas)
+            const data =   await axios.post('/schedule-message', datas);
+            console.log(data)
+            await handleResponse(data);
+
+        }
 
         const handleResponse = async (response) => {
             if ([200, 201].includes(response.status)) {
@@ -418,7 +425,8 @@ export default {
             selectProduct,
             scheduledMessage,
             scheduledTime,
-            createNewAdmin
+            createNewAdmin,
+            add
         };
     }
 };

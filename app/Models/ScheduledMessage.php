@@ -13,6 +13,7 @@ class ScheduledMessage extends Model
         'customer_id',
         'message_content',
         'scheduled_date',
+        'product_id',
         'status',
     ];
 

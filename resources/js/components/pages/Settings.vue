@@ -89,6 +89,7 @@ import axios from "../../axios.js";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import Utils from "../../Utils.js";
+import pic from "../../../../public/images/default.png";
 
 export default {
     name: "Settings",
@@ -203,6 +204,7 @@ export default {
             previewImage,
             createNewAdmin,
             user,
+            pic
         };
     },
 };

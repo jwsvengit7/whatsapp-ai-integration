@@ -44,7 +44,7 @@ import AppSidebar from "../dashboard-components/AppSidebar.vue";
 import AppHeader from "../dashboard-components/AppHeader.vue";
 import {useUser} from "../composables/useUser.js";
 import {onMounted, ref} from "vue";
-import pic from "../../../../public/images/1723524642068.jpeg";
+import pic from "../../../../public/images/default.png";
 import Utils from "../../Utils.js";
 
 export default {
