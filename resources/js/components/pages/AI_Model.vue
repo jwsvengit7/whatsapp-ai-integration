@@ -6,7 +6,7 @@
             <div class="box-container">
                 <div class="box-div">
                     <div class="box">
-                        <img :src="pic" alt="" width="20" height="20"  onclick="window.location.href='educate-ai?name=Fuel'"/>
+                        <img src="https://uat.smefunds.com/public/images/kike-logo.png" alt="" width="20" height="20"  onclick="window.location.href='educate-ai?name=Fuel'"/>
 
 
 
