@@ -253,7 +253,7 @@ class WhatsappService
             $conversation_data = $customer->message_json ?? "";
 
 
-            if($customer->has_completed_onboarding){
+            if($customer->completed_onboarding){
                 $this->saveMessage($customer->id, $incomingMessage, "received", time());
                 $aiKnowledge = "Please answer any thing he ask from here: ".$incomingMessage;
                 $aiMessage = $this->generateAIResponse($aiKnowledge);
@@ -324,7 +324,6 @@ class WhatsappService
                             'questions_json' => null,
                             'current_question_index' => null,
                             'message_json' => null,
-                            'has_completed_onboarding' => true,
                         ]);
                     }
                     break;
@@ -377,7 +376,7 @@ class WhatsappService
                     $this->sendMessage($customer->phone, "Message scheduled successfully.", $customer->id, [],);
 
                     $customer->update([
-                        'has_completed_onboarding'=>true,
+                        'completed_onboarding'=>true,
                         'conversation_stage' => 0,
                         'message_json' => null,
                     ]);
