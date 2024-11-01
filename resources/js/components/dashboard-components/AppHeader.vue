@@ -27,7 +27,7 @@ const props = defineProps({
             <div class="content">
                 <button>Invite a member</button>
                 <div style="cursor: pointer;display: flex;align-items: center;justify-content: space-around;margin-left: 10px">
-                    <img :src="pic" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>
+                    <img src="https://uat.smefunds.com/public/images/default.png" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>
                     &nbsp;
                     <span>{{props.data.name}}</span>
                     <span class="fas fa-chevron-down"></span>

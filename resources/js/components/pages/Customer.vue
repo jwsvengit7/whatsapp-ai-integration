@@ -18,7 +18,7 @@
                     <tbody>
                     <tr v-for="(item, index) in allCustomers" :key="index">
                         <td>{{ index+1 }}</td>
-                        <td>    <div style="display: flex;align-items: center"><img :src="pic" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>&nbsp;{{ item.name }}</div></td>
+                        <td>    <div style="display: flex;align-items: center"><img src="https://uat.smefunds.com/public/images/default.png" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>&nbsp;{{ item.name }}</div></td>
 
                         <td>{{ item.phone }}</td>
                         <td>{{ utils.getDateFormat(item.created_at) }}</td>
