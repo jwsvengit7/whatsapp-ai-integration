@@ -18,6 +18,7 @@ class Customer extends Model
         'phone',
         'email',
         'conversation_stage',
+        'has_completed_onboarding',
         'location',
         'message_json',
         'questions_json',

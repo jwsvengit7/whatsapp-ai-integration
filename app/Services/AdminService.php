@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Request;
+
 interface AdminService
 {
 
@@ -13,4 +15,6 @@ interface AdminService
     public function fetchAllUsers();
 
     public function fetchConversation(\Illuminate\Http\Request $request);
+
+    public function createScheduledMessage(Request $request): \Illuminate\Http\JsonResponse;
 }

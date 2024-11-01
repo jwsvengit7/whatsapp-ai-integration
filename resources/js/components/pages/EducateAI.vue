@@ -5,6 +5,7 @@
             <AppHeader text="Settings" :data="user" />
             <div class="box-container">
                 <Preloader :loading="loadings" />
+                <div class="div1">
                 <form class="add-container" @submit.prevent="createNewAdmin">
                     <h2 class="form-title">Manage Products</h2>
                     <div class="container-box">
@@ -21,22 +22,38 @@
                             <input type="text" :name="type" :value="type" class="text-input" readonly />
                             <div v-for="(product, index) in allProduct" :key="index">
                                 <div v-if="product.name === type && product.questions?.length">
-                                <ol class="question-list">
-                                    <input type="hidden" name="id" :value="id" />
-                                    <li v-for="(question, qIndex) in product.questions" :key="qIndex" class="question-item">
-                                        <div style="display: flex;">
-                                            <input type="text" v-model="question.question" class="question-input" />
-                                            <button type="button" @click="confirmDeleteQuestion(product, qIndex)" class="delete-button">Delete</button>
-                                        </div>
-
-                                    </li>
-                                </ol>
-                            </div>
+                                    <ol class="question-list">
+                                        <input type="hidden" name="id" :value="id" />
+                                        <li v-for="(question, qIndex) in product.questions" :key="qIndex" class="question-item">
+                                            <div style="display: flex;">
+                                                <input type="text" v-model="question.question" class="question-input" />
+                                                <button type="button" @click="confirmDeleteQuestion(product, qIndex)" class="delete-button">Delete</button>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                </div>
                             </div>
 
                             <div class="new-question-container">
                                 <input type="text" v-model="newQuestion" placeholder="Add a new question" class="text-input new-question-input" />
                                 <button type="button" @click="addQuestion" class="add-question-button">Add Question</button>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Settings Toggle -->
+                        <div class="advanced-settings">
+                            <button type="button" @click="showAdvanced = !showAdvanced" class="advanced-settings-button">
+                                {{ showAdvanced ? "Hide Advanced Settings" : "Show Advanced Settings" }}
+                            </button>
+
+                            <!-- Advanced Settings Section -->
+                            <div v-if="showAdvanced" class="advanced-settings-content">
+                                <h3 class="section-title">Schedule a Message</h3>
+                                <label for="scheduledMessage" class="input-label">Message</label>
+                                <input type="text" v-model="scheduledMessage" placeholder="Enter the message to schedule" class="text-input" />
+
+                                <label for="scheduledTime" class="input-label">Schedule Time</label>
+                                <input type="datetime-local" v-model="scheduledTime" class="text-input" />
                             </div>
                         </div>
                     </div>
@@ -47,13 +64,17 @@
                         </div>
                     </div>
                 </form>
+                </div>
             </div>
         </main>
     </div>
 </template>
-
-
 <style scoped>
+.div1{
+    width:auto;
+    height: 700px;
+    overflow: scroll;
+}
 .dashboard {
     display: flex;
     min-height: 100vh;
@@ -205,6 +226,28 @@
     color:white;
     padding: 10px;
 }
+
+.advanced-settings {
+    margin-top: 20px;
+}
+
+.advanced-settings-button {
+    padding: 10px 15px;
+    background: #17a2b8;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.advanced-settings-button:hover {
+    background: #138496;
+}
+
+.advanced-settings-content {
+    margin-top: 20px;
+}
 </style>
 
 <script>
@@ -224,7 +267,10 @@ export default {
     data() {
         return {
             type: '',
-            newQuestion: ''
+            newQuestion: '',
+            showAdvanced: false,
+            scheduledMessage: '',
+            scheduledTime: ''
         };
     },
     mounted() {
@@ -240,6 +286,7 @@ export default {
             this.type = this.$route.query.name || 'Fuel';
         },
 
+
     },
     setup() {
         const router = useRouter();
@@ -250,13 +297,11 @@ export default {
         const loadings = ref(false);
         const errors = ref('');
         const id = ref('');
+        const scheduledMessage = ref('');
+        const scheduledTime = ref('');
         onMounted(() => {
             loadUser();
             loadAllProduct();
-        });
-
-        watch(() => router.currentRoute.value.query.name, (newType) => {
-            type.value = newType || 'Fuel';
         });
 
         const selectProduct = (productName) => {
@@ -265,9 +310,7 @@ export default {
 
             id.value = selectedProduct ? selectedProduct.id : null;
             router.push({ query: { name: type.value } });
-
         };
-
         const addQuestion = () => {
             if (!newQuestion.value.trim()) return;
 
@@ -297,7 +340,6 @@ export default {
         const deleteQuestion = (product, index) => {
             const questionToDelete = product.questions[index];
 
-            // Remove the question from the questions array
             const questionIndex = product.questions.indexOf(questionToDelete);
             if (questionIndex > -1) {
                 product.questions.splice(questionIndex, 1);
@@ -309,18 +351,24 @@ export default {
             errors.value = '';
             const currentProduct = allProduct.value.find(product => product.name === type.value);
 
-            // Create data object
             const data = {
                 type: type.value,
-                id: currentProduct ? currentProduct.id : id,
+                id: currentProduct ? currentProduct.id : id.value,
                 questions: currentProduct ? currentProduct.questions : []
             };
 
             try {
-                console.log(data)
-                const response = await axios.put('/update-product', data
-                );
+                const response = await axios.put('/update-product', data);
                 await handleResponse(response);
+
+                if (scheduledMessage.value && scheduledTime.value) {
+                    const data =   await axios.post('/schedule-message', {
+                        message: scheduledMessage.value,
+                        time: scheduledTime.value
+                    });
+                    await handleResponse(data);
+
+                }
             } catch (error) {
                 handleError(error);
             } finally {
@@ -336,20 +384,18 @@ export default {
                     icon: 'success',
                     confirmButtonText: 'Okay'
                 });
-               await router.push('/dashboard/all-product');
+                await router.push('/dashboard/all-product');
             } else {
                 await showError('An unexpected error occurred.');
             }
         };
 
-        // Handle errors during API call
         const handleError = (error) => {
             const errorMessage = error.response?.data?.message || 'An error occurred. Please try again.';
             errors.value = errorMessage;
             showError(errors.value);
         };
 
-        // Show error message
         const showError = async (message) => {
             await Swal.fire({
                 title: 'Error!',
@@ -366,14 +412,14 @@ export default {
             loadings,
             errors,
             id,
+            addQuestion,
+            confirmDeleteQuestion,
             allProduct,
             selectProduct,
-            addQuestion,
-            createNewAdmin,
-            confirmDeleteQuestion
+            scheduledMessage,
+            scheduledTime,
+            createNewAdmin
         };
     }
 };
 </script>
-
-

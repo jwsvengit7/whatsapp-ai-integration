@@ -49,6 +49,10 @@ class AdminController extends BaseController
     {
         return $this->service->fetchConversation($request);
     }
+    public function createScheduledMessage(Request $request): JsonResponse
+    {
+        return $this->service->createScheduledMessage($request);
+    }
 
 
 }

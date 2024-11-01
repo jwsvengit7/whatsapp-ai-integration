@@ -8,6 +8,7 @@ use App\Helpers\CustomerUtils;
 use App\Helpers\ResponseUtils;
 use App\Models\Conversation;
 use App\Models\Product;
+use App\Models\ScheduledMessage;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -47,13 +48,9 @@ class AdminServiceImpl implements AdminService
             return ResponseUtils::respondWithValidationErrors($validator);
         }
 
-        $uploadPath = public_path('images'); // This gets the full path to public/uploads
         $imagePath = null;
-
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = time() . '_' . $image->getClientOriginalName();
-            $imagePath = $image->move($uploadPath, $filename);
+            $imagePath = $request->file('image')->store('images', 'public');
         }
         $questions = [
             "What is the warranty period for this product?",
@@ -184,6 +181,33 @@ class AdminServiceImpl implements AdminService
 
         $conversations = Conversation::all();
         return ResponseUtils::respondWithSuccess($conversations->toArray(), Response::HTTP_OK);
+    }
+
+    public function createScheduledMessage(Request $request): \Illuminate\Http\JsonResponse
+    {
+
+        $validator = Validator::make($request->all(), [
+            'customer_id' => 'required|exists:customers,id',
+            'message_content' => 'required|string',
+            'scheduled_date' => 'required|date|after:today',
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseUtils::respondWithValidationErrors($validator);
+        }
+
+
+        $scheduledMessage = ScheduledMessage::create([
+            'customer_id' => $request->input( 'customer_id'),
+            'message_content' => $request->input('message_content'),
+            'scheduled_date' => $request->input('scheduled_date'),
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'message' => 'Message scheduled successfully.',
+            'scheduledMessage' => $scheduledMessage
+        ], 201);
     }
 
 }
