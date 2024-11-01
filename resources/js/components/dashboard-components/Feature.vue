@@ -24,8 +24,6 @@ const props = defineProps({
         <p class="p"></p>
             <button @click="props.func">Add Product</button>
     </div>
-
-
 </div>
 </template>
 
