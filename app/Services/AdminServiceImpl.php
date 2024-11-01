@@ -187,6 +187,7 @@ class AdminServiceImpl implements AdminService
     {
 
         $validator = Validator::make($request->all(), [
+            'product_name'=>'required|string',
 
             'message_content' => 'required|string',
             'scheduled_date' => 'required|date',
