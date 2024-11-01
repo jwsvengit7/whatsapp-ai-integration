@@ -392,6 +392,18 @@ class WhatsappService
         }
     }
 
+    protected function loadProductQuestions($productId): array {
+        // Fetch the product by ID
+        $product = Product::where('id', $productId)->first();
+
+        // If the product is not found, return an empty array
+        if (!$product) {
+            return [];
+        }
+
+        // Fetch and return the questions related to the found product
+        return ProductQuestion::where('product_id', $product->id)->get()->toArray();
+    }
 
 
 
