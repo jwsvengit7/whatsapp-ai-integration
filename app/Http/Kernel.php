@@ -12,6 +12,11 @@ class Kernel extends HttpKernel
     {
         $schedule->command('messages:send-scheduled')->daily();
     }
+
+    protected array $commands = [
+        \App\Console\Commands\SendScheduledMessages::class,
+    ];
+
     /**
      * The application's global HTTP middleware stack.
      *
