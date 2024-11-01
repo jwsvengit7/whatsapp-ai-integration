@@ -373,7 +373,7 @@ export default {
             const datas ={
                 message_content: scheduledMessage.value,
                 scheduled_date: scheduledTime.value,
-                product_name:id.value
+                product_name:type.value
 
             };
             console.log(datas)

@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::create('scheduled_messages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id');
             $table->text('message_content');
             $table->date('scheduled_date');
             $table->string('status')->default('pending');
             $table->timestamps();
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
         });
     }
 

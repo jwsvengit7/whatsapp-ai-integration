@@ -34,8 +34,8 @@ class SendScheduledMessages extends Command
             ->get();
 
         foreach ($scheduledMessages as $scheduledMessage) {
-            $customer = Customer::find($scheduledMessage->customer_id);
-
+            $cus = Customer::all();
+            foreach ($cus as $customer) {
             if ($customer) {
                 $this->whatsappService->sendMessage($customer->phone, $scheduledMessage->message_content, $customer->id, []);
 
@@ -44,6 +44,7 @@ class SendScheduledMessages extends Command
 
                 $this->info("Message sent to {$customer->phone}");
             }
+        }
         }
     }
 
