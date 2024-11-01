@@ -392,7 +392,7 @@ class WhatsappService
 
     protected function loadProductQuestions($productId): array {
         // Fetch the product by ID
-        $product = Product::where('product_id', $productId)->first();
+        $product = Product::where('id', $productId)->first();
 
         if (!$product) {
             return [];
