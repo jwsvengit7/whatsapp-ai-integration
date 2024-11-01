@@ -251,9 +251,7 @@ class WhatsappService
                     $aiMessage = $this->generateAIResponse("Direct conversation started.");
                     $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                     return;
-                }
-
-                elseif (strtolower($incomingMessage) === 'schedule') {
+                } elseif (strtolower($incomingMessage) === 'schedule') {
                     $this->sendMessage($customer->phone, "What date and time would you like to schedule the message?", $customer->id, []);
                     $customer->update(['conversation_stage' => 5]); // Stage for scheduling
                     return;
@@ -317,9 +315,9 @@ class WhatsappService
                             "message_json" => $conversation_data,
                         ]);
                     } else {
-                        $this->sendMessage($customer->phone, "No more questions for this product.", $customer->id, []);
+                        $this->sendMessage($customer->phone, "No questions for this product.", $customer->id, []);
                         $customer->update([
-                            'conversation_stage' => 0,
+                            'conversation_stage' => 6,  // Proceed to prediction stage
                             'questions_json' => null,
                             'current_question_index' => null,
                             'message_json' => null,
@@ -343,28 +341,32 @@ class WhatsappService
                         $this->sendMessage($customer->phone, $nextQuestion, $customer->id, []);
 
                         $customer->update([
-                            'conversation_stage' => $stage + 1,
+                            'conversation_stage' => $stage,
                             'current_question_index' => $currentQuestionIndex + 1,
                             'message_json' => $conversation_data,
                         ]);
                     } else {
-                        $conversation_data .= "$incomingMessage\n";
-                        $this->saveMessage($customer->id, $incomingMessage, "received", time());
-
-                        $aiMessage = $this->generateAIResponse($conversation_data);
-                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-                        $customer->update([
-                            'conversation_stage' => 0,
-                            'questions_json' => null,
-                            'current_question_index' => null,
-                            'message_json' => null,
-                            'has_completed_onboarding' => true,
-                        ]);
+                        $customer->update(['conversation_stage' => 6]); // Proceed to prediction stage
+                        $this->handleConversation($customer, $incomingMessage);
                     }
                     break;
 
-                // Scheduling stage
+                case 6:
+                    $conversation_data .= "$incomingMessage\n";
+                    $this->saveMessage($customer->id, $incomingMessage, "received", time());
+
+                    $aiMessage = $this->generateAIResponse($conversation_data);
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                    $this->sendMessage($customer->phone, "Now you can schedule a message. What date and time would you like?", $customer->id, []);
+                    $customer->update([
+                        'conversation_stage' => 5,
+                        'questions_json' => null,
+                        'current_question_index' => null,
+                        'message_json' => $conversation_data,
+                    ]);
+                    break;
+
                 case 5:
                     $conversation_data .= "Scheduled Message: $incomingMessage\n";
                     $this->saveMessage($customer->id, $incomingMessage, "scheduled", time());
@@ -390,15 +392,6 @@ class WhatsappService
         }
     }
 
-    protected function loadProductQuestions($productId): array {
-        // Fetch the product by ID
-        $product = Product::where('id', $productId)->first();
-
-        if (!$product) {
-            return [];
-        }
-        return ProductQuestion::where('product_id', $product->id)->get()->toArray();
-    }
 
 
 
