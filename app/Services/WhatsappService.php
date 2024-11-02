@@ -252,13 +252,12 @@ class WhatsappService
             $stage = $customer->conversation_stage ?? 0;
             $conversation_data = $customer->message_json ?? "";
 
-
-            if($customer->completed_onboarding){
+            // If onboarding is complete, chat is only between the user and AI
+            if ($customer->completed_onboarding) {
                 $this->saveMessage($customer->id, $incomingMessage, "received", time());
-                $aiKnowledge = "Please answer any thing he ask from here: ".$incomingMessage;
-                $aiMessage = $this->generateAIResponse($aiKnowledge);
+                $aiMessage = $this->generateAIResponse($incomingMessage);
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
+                return;
             }
 
             switch ($stage) {
@@ -359,8 +358,8 @@ class WhatsappService
 
                     $aiMessage = $this->generateAIResponse($conversation_data);
                     $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-                   $image= $this->imageGenerator->createStyledCalendarImage("2024-10-23","10:45pm",[]);
-                    $this->sendMessage($customer->phone, "Now you can schedule a message. What date and time would you like?", $customer->id, [],$image);
+                    $image = $this->imageGenerator->createStyledCalendarImage("2024-10-23", "10:45pm", []);
+                    $this->sendMessage($customer->phone, "Now you can schedule a message. What date and time would you like?", $customer->id, [], $image);
 
                     $customer->update([
                         'conversation_stage' => 5,
@@ -373,10 +372,10 @@ class WhatsappService
                 case 5:
                     $conversation_data .= "Scheduled Message: $incomingMessage\n";
                     $this->saveMessage($customer->id, $incomingMessage, "scheduled", time());
-                    $this->sendMessage($customer->phone, "Message scheduled successfully.", $customer->id, [],);
+                    $this->sendMessage($customer->phone, "Message scheduled successfully.", $customer->id, []);
 
                     $customer->update([
-                        'completed_onboarding'=>true,
+                        'completed_onboarding' => true,
                         'conversation_stage' => 0,
                         'message_json' => null,
                     ]);
