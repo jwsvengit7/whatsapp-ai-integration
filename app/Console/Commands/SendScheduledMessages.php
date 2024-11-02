@@ -7,6 +7,7 @@ use App\Services\WhatsappService;
 use Illuminate\Console\Command;
 use App\Models\ScheduledMessage;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Http\Client\ConnectionException;
 
@@ -31,6 +32,8 @@ class SendScheduledMessages extends Command
         $scheduledMessages = ScheduledMessage::where('scheduled_date', $today)
             ->where('status', 'pending')
             ->get();
+
+        Log::info("Today");
 
         foreach ($scheduledMessages as $scheduledMessage) {
             $cus = Customer::all();
