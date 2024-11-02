@@ -252,7 +252,6 @@ class WhatsappService
             $stage = $customer->conversation_stage ?? 0;
             $conversation_data = $customer->message_json ?? "";
 
-            // If onboarding is complete, chat is only between the user and AI
             if ($customer->completed_onboarding) {
                 $this->saveMessage($customer->id, $incomingMessage, "received", time());
                 $aiMessage = $this->generateAIResponse($incomingMessage);
@@ -370,9 +369,6 @@ class WhatsappService
                     break;
 
                 case 5:
-                    $conversation_data .= "Scheduled Message: $incomingMessage\n";
-                    $this->saveMessage($customer->id, $incomingMessage, "scheduled", time());
-                    $this->sendMessage($customer->phone, "Message scheduled successfully.", $customer->id, []);
 
                     $customer->update([
                         'completed_onboarding' => true,
