@@ -17,4 +17,5 @@ interface AdminService
     public function fetchConversation(\Illuminate\Http\Request $request);
 
     public function createScheduledMessage(Request $request): \Illuminate\Http\JsonResponse;
+    public function generateCalendarGif();
 }

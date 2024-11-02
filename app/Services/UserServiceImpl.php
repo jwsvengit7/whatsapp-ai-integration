@@ -124,6 +124,10 @@ class UserServiceImpl implements UserService
             'exp' => $expiresAt,
         ];
         $token = JWTAuth::claims($customClaims)->attempt($validator->validated());
+
+        if (!$token) {
+            return ResponseUtils::respondWithError('Incorrect password', Response::HTTP_UNAUTHORIZED);
+        }
         return ResponseUtils::respondWithSuccess(
             LoginResponse::loginResponse($user, $token)
             , Response::HTTP_OK);

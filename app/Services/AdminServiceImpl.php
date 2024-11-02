@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services;
-
+use Illuminate\Support\Facades\Storage;
 use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Helpers\CustomerUtils;
@@ -227,4 +227,69 @@ class AdminServiceImpl implements AdminService
         }
         }
 
+
+
+
+    public function generateCalendarGif()
+    {
+        $width = 300;
+        $height = 300;
+
+        // Create a blank image
+        $image = imagecreatetruecolor($width, $height);
+
+        // Set up colors
+        $background = imagecolorallocate($image, 255, 255, 255);
+        $textColor = imagecolorallocate($image, 0, 0, 0);
+
+        // Fill the background color
+        imagefilledrectangle($image, 0, 0, $width, $height, $background);
+
+        // Add month and year at the top
+        $fontSize = 5;
+        $margin = 20;
+        $monthYear = date("F Y");
+        imagestring($image, $fontSize, ($width / 2) - (strlen($monthYear) * imagefontwidth($fontSize) / 2), $margin, $monthYear, $textColor);
+
+        // Days of the week
+        $daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        $dayWidth = ($width - 2 * $margin) / 7;
+
+        // Display day names
+        foreach ($daysOfWeek as $i => $day) {
+            imagestring($image, $fontSize, $margin + $i * $dayWidth, $margin + 30, $day, $textColor);
+        }
+
+        // Calculate the first day of the month and total days in the month
+        $firstDayOfMonth = date('w', strtotime(date('Y-m-01')));
+        $daysInMonth = date('t');
+
+        $day = 1;
+        $yOffset = $margin + 50;
+        for ($i = 0; $i < 6; $i++) { // Maximum 6 rows
+            for ($j = 0; $j < 7; $j++) {
+                if ($i === 0 && $j < $firstDayOfMonth || $day > $daysInMonth) {
+                    continue;
+                }
+                imagestring($image, $fontSize, $margin + $j * $dayWidth, $yOffset + $i * 20, $day, $textColor);
+                $day++;
+            }
+        }
+
+        // File path
+        $filePath = storage_path('app/public/calendar.gif');
+        if (!file_exists(dirname($filePath))) {
+            mkdir(dirname($filePath), 0755, true); // Create directory if it doesn't exist
+        }
+        imagegif($image, $filePath);
+
+        // Clean up
+        imagedestroy($image);
+
+        return response()->download($filePath, 'calendar.gif', [
+            'Content-Type' => 'image/gif'
+        ]);
     }
+
+
+}

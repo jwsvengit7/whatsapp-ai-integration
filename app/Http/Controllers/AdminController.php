@@ -54,5 +54,11 @@ class AdminController extends BaseController
         return $this->service->createScheduledMessage($request);
     }
 
+    public function generateCalendarGif()
+    {
+        return $this->service->generateCalendarGif();
+    }
+
+
 
 }
