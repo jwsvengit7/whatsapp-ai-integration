@@ -1,8 +1,9 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user" />
+        <AppSidebar :toggleSidebar="toggleSidebar"  :isSidebarVisible="isSidebarVisible" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Create Cooking Fuel" :data="user" />
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <p v-if="user">Welcome, {{ user.name }}!</p>
                 <p v-else>Please log in to access features.</p>
@@ -51,7 +52,11 @@ import { useUser } from "../composables/useUser.js";
 import axios from "../../axios.js";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
 
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'CreateProduct',
     components: { Preloader, AppHeader, AppSidebar },
@@ -154,6 +159,8 @@ export default {
             onImageChange,
             previewImage,
             user,
+            isSidebarVisible,
+            toggleSidebar
         };
     }
 };
@@ -212,5 +219,11 @@ export default {
     color: #fff !important;
     cursor: pointer;
     border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+    .container-box {
+        width: 100%;
+    }
 }
 </style>

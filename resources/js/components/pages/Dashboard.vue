@@ -1,8 +1,8 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user"></AppSidebar>
+        <AppSidebar  :isSidebarVisible="isSidebarVisible" :toggleSidebar="toggleSidebar" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Dashboard" :data="user"></AppHeader>
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
             <div class="box-container">
                 <p v-if="loading">Loading user data...</p>
                 <p v-if="error">{{ error }}</p>
@@ -32,11 +32,15 @@
 </template>
 
 <script>
-import { onMounted } from 'vue';
+import {onMounted, ref} from 'vue';
 import AppSidebar from "../dashboard-components/AppSidebar.vue";
 import AppHeader from "../dashboard-components/AppHeader.vue";
 import { useUser } from "../composables/useUser.js";
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
 
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'Dashboard',
     components: { AppSidebar, AppHeader },
@@ -49,7 +53,7 @@ export default {
 
         });
 
-        return { user, loading, error };
+        return { user, loading, error,toggleSidebar,isSidebarVisible };
     }
 };
 </script>
@@ -87,4 +91,6 @@ export default {
     padding-top: 20px;
     color: #0d1a3a;
 }
+
+
 </style>

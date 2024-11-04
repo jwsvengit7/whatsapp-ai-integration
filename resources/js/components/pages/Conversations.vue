@@ -7,7 +7,11 @@ import Utils from "../../Utils.js";
 import {onMounted, ref} from "vue";
 import pic from "../../../../public/images/kike-logo.png";
 import axios from "../../axios.js";
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
 
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'Conversation',
     components: {Feature, AppHeader, AppSidebar},
@@ -58,16 +62,17 @@ export default {
             }
         });
 
-        return { user,phone,name, utils, allConversation, loading, error, pic, id };
+        return { user,phone,name, utils, allConversation, loading, error, pic, id,isSidebarVisible,toggleSidebar };
     }
 }
 </script>
 
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user"></AppSidebar>
+        <AppSidebar :toggleSidebar="toggleSidebar"  :isSidebarVisible="isSidebarVisible" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Conversations" :data="user"></AppHeader>
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <div class="chat-room">
                     <!-- Show loading spinner -->
@@ -255,4 +260,5 @@ export default {
     display: flex;
     justify-content: flex-end;
 }
+
 </style>

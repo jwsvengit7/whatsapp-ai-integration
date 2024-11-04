@@ -1,8 +1,10 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user"></AppSidebar>
+        <AppSidebar  :isSidebarVisible="isSidebarVisible" :toggleSidebar="toggleSidebar" :data="user"></AppSidebar>
+
         <main>
-            <AppHeader text="My Customer" :data="user"></AppHeader>
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <!-- User Table -->
                 <table class="user-table">
@@ -47,6 +49,11 @@ import {onMounted, ref} from "vue";
 import pic from "../../../../public/images/1723524642068.jpeg";
 import Utils from "../../Utils.js";
 
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
+
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'MyCustomer',
     computed: {
@@ -68,7 +75,7 @@ export default {
             loadAllCustomers();
         });
 
-        return { allCustomers,user, loading, error ,utils};
+        return { allCustomers,user, loading, error ,utils,isSidebarVisible,toggleSidebar};
     }
 };
 </script>

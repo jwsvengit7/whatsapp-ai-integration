@@ -1,8 +1,9 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user" />
+        <AppSidebar :toggleSidebar="toggleSidebar"  :isSidebarVisible="isSidebarVisible" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Admin Feature" :data="user" />
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <p v-if="user">Welcome, {{ user.name }}!</p>
                 <p v-else>Please log in to access features.</p>
@@ -62,6 +63,11 @@ import axios from "../../axios.js";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
+
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'AddAdmin',
     components: { Preloader, AppHeader, AppSidebar },
@@ -152,6 +158,7 @@ export default {
             adminFields,
             createNewAdmin,
             user,
+            toggleSidebar,isSidebarVisible
         };
     }
 };
@@ -202,5 +209,11 @@ export default {
     padding: 15px 25px;
     border: none;
     border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+    .container-box {
+        width: 100%;
+    }
 }
 </style>

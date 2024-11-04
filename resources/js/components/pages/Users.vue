@@ -1,8 +1,9 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user"></AppSidebar>
+        <AppSidebar  :isSidebarVisible="isSidebarVisible" :toggleSidebar="toggleSidebar" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Users" :data="user"></AppHeader>
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <table class="user-table">
                     <thead>
@@ -62,7 +63,11 @@ import {useUser} from "../composables/useUser.js";
 import {onMounted, ref} from "vue";
 import pic from "../../../../public/images/1723524642068.jpeg";
 import Utils from "../../Utils.js";
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
 
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'Users',
     computed: {
@@ -82,7 +87,7 @@ export default {
             loadAllUsers();
         });
 
-        return { allUsers,user, loading, error ,utils};
+        return { allUsers,user, loading, error ,utils,isSidebarVisible,toggleSidebar};
     }
 };
 </script>

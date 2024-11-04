@@ -1,13 +1,14 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user" />
+        <AppSidebar :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Settings" :data="user" />
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <Preloader :loading="loadings" />
                 <div class="div1">
                 <form class="add-container" @submit.prevent="createNewAdmin">
-                    <h2 class="form-title">Manage Products</h2>
+                    <h2 class="form-title">Manage Products &nbsp;<button type="button" @click="showAI = !showAI" class="advanced-settings-button">Edit AI Context</button></h2>
                     <div class="container-box">
                         <h3 class="section-title">Select Product</h3>
                         <div class="button-group">
@@ -56,6 +57,14 @@
                                 <input type="datetime-local" v-model="scheduledTime" class="text-input" />
                                 <button type="button" @click="add" class="add-question-button">Add Question</button>
                             </div>
+
+
+                            <div class="rgb" v-if="showAI">
+                                <div class="advanced-settingsai">
+
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
@@ -249,6 +258,26 @@
 .advanced-settings-content {
     margin-top: 20px;
 }
+
+.advanced-settingsai {
+    width:50%;
+    background: white;
+    height: 600px;
+
+    box-shadow: 0 0 2px 1px #ddd;
+
+}
+.rgb{
+    width:100%;
+    height: 100vh;
+    background: rgb(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
 </style>
 
 <script>
@@ -260,7 +289,11 @@ import { useUser } from "../composables/useUser.js";
 import axios from "../../axios.js";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
 
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'EducateAI',
     components: { Preloader, AppHeader, AppSidebar },
@@ -270,6 +303,7 @@ export default {
             type: '',
             newQuestion: '',
             showAdvanced: false,
+            showAI:false,
             scheduledMessage: '',
             scheduledTime: ''
         };
@@ -412,6 +446,10 @@ export default {
             });
         };
 
+        const openAI = async()=>{
+
+        }
+
         return {
             user,
             type,
@@ -419,6 +457,7 @@ export default {
             loadings,
             errors,
             id,
+            openAI,
             addQuestion,
             confirmDeleteQuestion,
             allProduct,
@@ -426,7 +465,9 @@ export default {
             scheduledMessage,
             scheduledTime,
             createNewAdmin,
-            add
+            add,
+            isSidebarVisible,
+            toggleSidebar
         };
     }
 };

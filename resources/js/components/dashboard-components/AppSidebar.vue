@@ -1,6 +1,6 @@
 <script setup>
 import logo from '../../../../public/images/kike-logo.png';
-import {defineProps} from "vue";
+import {defineProps, ref} from "vue";
 
 
     function logout(){
@@ -14,6 +14,12 @@ const props = defineProps({
         type: {},
         required: true
     },
+    isSidebarVisible: {
+        type: Boolean,
+    },
+    toggleSidebar: {
+        type: Function,
+    },
 
 
 
@@ -22,8 +28,14 @@ const props = defineProps({
 </script>
 
 <template>
-    <aside>
-        <img src="https://uat.smefunds.com/public/images/kike-logo.png" width="100">
+    <aside :class="['iaside', { 'is-visible': props.isSidebarVisible }]">
+
+
+       <div style="display: flex;width: 100%;justify-content: space-between;align-items: center">
+           <img src="https://uat.smefunds.com/public/images/kike-logo.png" width="100">
+           <button class="btn" style="padding-right: 10px;color:white;background: unset;border: 0px " @click="toggleSidebar">Close</button>
+       </div>
+
         <nav>
             <div class="nav-content">
                 <router-link to="/dashboard">
@@ -95,9 +107,11 @@ const props = defineProps({
 
     </aside>
 
+
+
 </template>
 
-<style scoped>
+<style >
 .logout{
     margin-top: 100px;
 }
@@ -107,5 +121,9 @@ const props = defineProps({
 .i1{
     width: 15px;
 }
+.mainAside{
+    display: block !important;
+}
+
 
 </style>

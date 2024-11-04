@@ -1,50 +1,68 @@
 <script setup>
+import { ref } from 'vue';
 import { defineProps } from 'vue';
 import Utils from "../../Utils.js";
-import pic from "../../../../public/images/default.png";
 
-const utils = new Utils()
-const props = defineProps({
+const utils = new Utils();
 
+
+    const props = defineProps({
     text: {
-        type: String,
-        required: true
-    },
+    type: String,
+    required: true
+},
     data: {
-        type: {},
-        required: true
-    },
-
+    type: Object,
+    required: true
+},
+    toggleSidebar: {
+    type: Function,
+    required: true
+},
+    isSidebarVisible: {
+    type: Boolean,
+    required: true
+}
 });
 </script>
 
 <template>
-        <header>
-            <div class="text-content">
-                <span class="fas fa-chevron-left"></span>
-                <span><b>{{ text }}</b></span>
+    <header>
+        <div class="text-content">
+            <span class="none fas fa-bars"></span>
+            <span @click="props.toggleSidebar" class="hide fas fa-bars"></span>
+            <span><b>{{ text }}</b></span>
+        </div>
+        <div class="content">
+            <button class="none"> Invite a member</button>
+            <div style="cursor: pointer; display: flex; align-items: center; justify-content: space-around; margin-left: 10px">
+                <img src="https://uat.smefunds.com/public/images/default.png" alt="" style="width:25px; height: 25px; border-radius: 30px"/>
+                &nbsp;
+                <span>{{ data.name }}</span>
+                <span class="fas fa-chevron-down"></span>
             </div>
-            <div class="content">
-                <button>Invite a member</button>
-                <div style="cursor: pointer;display: flex;align-items: center;justify-content: space-around;margin-left: 10px">
-                    <img src="https://uat.smefunds.com/public/images/default.png" alt=""  style="width:25px;height: 25px;border-radius: 30px"/>
-                    &nbsp;
-                    <span>{{props.data.name}}</span>
-                    <span class="fas fa-chevron-down"></span>
-                </div>
-            </div>
+        </div>
+    </header>
 
-
-        </header>
 
 </template>
 
-<style scoped>
-.text-content{
-    width:20%;
-    padding: 10px;
 
+
+<style scoped>
+.text-content {
+    padding: 10px;
+    display: flex;
+    span {
+        cursor: pointer;
+        font-size: 17px;
+    }
 }
+
+.hide {
+    display: none;
+}
+
 header {
     width: 100%;
     align-items: center;
@@ -58,7 +76,8 @@ header {
     background: #fff;
     height: 10%;
 }
-.content{
+
+.content {
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -86,5 +105,26 @@ button {
 button:hover {
     color: #fff;
     background: #007bff;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    background: #f4f4f4;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+@media (max-width: 600px) {
+    .hide {
+        display: block;
+    }
+    .none {
+        display: none;
+    }
 }
 </style>

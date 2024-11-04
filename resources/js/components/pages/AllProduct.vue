@@ -1,8 +1,9 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user"></AppSidebar>
+        <AppSidebar :toggleSidebar="toggleSidebar"  :isSidebarVisible="isSidebarVisible" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="All Cooking Fuel" :data="user"></AppHeader>
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <!-- User Table -->
                 <table class="user-table">
@@ -18,7 +19,7 @@
                     <tbody>
                     <tr v-for="(item, index) in allProduct" :key="index">
                         <td>{{ index+1 }}</td>
-                        <td>    <div style="display: flex;align-items: center"><img :src="utils.getImage(item.image)" alt=""  style="width:35px;height: 35px;border-radius: 30px"/>&nbsp;{{ item.name }}</div></td>
+                        <td>    <div style="display: flex;align-items: center"><img src="https://uat.smefunds.com/public/images/kike-logo.png" alt=""  style="width:35px;height: 35px;border-radius: 30px"/>&nbsp;{{ item.name }}</div></td>
 
                         <td>Total Questions: {{ item.questions.length }}</td>
                         <td>{{ utils.getDateFormat(item.created_at) }}</td>
@@ -51,6 +52,11 @@ import axios from "../../axios.js";
 import Swal from "sweetalert2";
 import {useRouter} from "vue-router";
 
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
+
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'AllProduct',
     computed: {
@@ -61,7 +67,6 @@ export default {
     components: { AppHeader, AppSidebar},
     methods: {
         editProduct(name) {
-            // Use Vue Router to navigate to the edit page
             this.$router.push("educate-ai?name="+name);
         }
     },
@@ -81,7 +86,6 @@ export default {
 
                 loadings.value = true;
                 errors.value = '';
-
 
                 try {
                     const response = await axios.delete('/delete-product?id='+id
@@ -127,7 +131,7 @@ export default {
             };
 
 
-        return { allProduct,user, loading, error,deleteProduct ,utils};
+        return { allProduct,user, loading, error,deleteProduct ,utils,isSidebarVisible,toggleSidebar};
     }
 };
 </script>

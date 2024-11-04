@@ -1,8 +1,9 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user" />
+        <AppSidebar  :isSidebarVisible="isSidebarVisible" :toggleSidebar="toggleSidebar" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="Settings" :data="user" />
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <Preloader :loading="loadings" />
                 <form class="add-container" @submit.prevent="createNewAdmin">
@@ -90,7 +91,11 @@ import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import Utils from "../../Utils.js";
 import pic from "../../../../public/images/default.png";
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
 
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: "Settings",
     components: { Preloader, AppHeader, AppSidebar },
@@ -198,6 +203,8 @@ export default {
         onMounted(loadUser);
 
         return {
+            isSidebarVisible,
+            toggleSidebar,
             utils,
             loadings,
             onImageChange,  // For handling image change
@@ -251,5 +258,11 @@ export default {
     padding: 15px 25px;
     border: none;
     border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+    .container-box {
+        width: 100%;
+    }
 }
 </style>

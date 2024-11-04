@@ -207,7 +207,7 @@ main{
 
 aside{
 
-    width: 18%;
+    width: 28%;
     height: 100vh;
     background: linear-gradient(135deg, #0d1a3a, #0d1938 17%, #0d1938 53%, #0f1f45);
     img{
@@ -245,5 +245,12 @@ nav{
     font-family: 'Montserrat', sans-serif;
 }
 
+@media (max-width: 600px) {
+    aside{
+        width: 60% !important;
+        position: fixed !important;
+    }
+
+}
 
 

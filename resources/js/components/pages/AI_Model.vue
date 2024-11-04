@@ -1,8 +1,9 @@
 <template>
     <div class="dashboard">
-        <AppSidebar :data="user"></AppSidebar>
+        <AppSidebar :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible" :data="user"></AppSidebar>
         <main>
-            <AppHeader text="AI MODEL" :data="user"></AppHeader>
+            <AppHeader text="Dashboard" :data="user" :toggleSidebar="toggleSidebar" :isSidebarVisible="isSidebarVisible"></AppHeader>
+
             <div class="box-container">
                 <div class="box-div">
                     <div class="box">
@@ -24,11 +25,16 @@
 import AppSidebar from "../dashboard-components/AppSidebar.vue";
 import AppHeader from "../dashboard-components/AppHeader.vue";
 import Feature from "../dashboard-components/Feature.vue";
-import { onMounted} from "vue";
+import {onMounted, ref} from "vue";
 import {useUser} from "../composables/useUser.js";
 import Utils from "../../Utils.js";
 import pic from "../../../../public/images/kike-logo.png";
 
+const isSidebarVisible = ref(false); // Ref to control sidebar visibility
+
+const toggleSidebar = function () {
+    isSidebarVisible.value = !isSidebarVisible.value; // Toggle visibility
+};
 export default {
     name: 'AI_MODEL',
     components: {Feature, AppHeader, AppSidebar},
@@ -41,7 +47,7 @@ export default {
 
         });
 
-        return { user,utils, loading, error ,pic};
+        return { user,utils, loading, error ,pic,isSidebarVisible,toggleSidebar};
     }
 
 

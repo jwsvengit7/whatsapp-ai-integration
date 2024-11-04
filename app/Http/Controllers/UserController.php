@@ -29,7 +29,7 @@ class UserController extends BaseController
     {
         return $this->service->userSignup($request);
     }
-    public function refererLink($link)
+    public function refererLink($link): JsonResponse
     {
         return $this->service->refererLink($link);
 
