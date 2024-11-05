@@ -3,19 +3,25 @@
 namespace App\Services;
 
 use App\Helpers\AIHelpers;
+use App\Helpers\CustomerUtils;
+use App\Helpers\HttpUtils;
 use App\Helpers\ImageGenerator;
+use App\Helpers\ResponseUtils;
 use App\Models\Conversation;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\ProductQuestion;
+use App\Models\User;
 use Exception;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class WhatsappService
 {
@@ -31,11 +37,11 @@ class WhatsappService
      * Handle the reception of a new message.
      *
      * @param Request $request
-     * @return ResponseFactory|Application|Response|void
      * @throws ConnectionException
      * @throws Exception
      */
-    public function receiveMessage(Request $request) {
+    public function receiveMessage(Request $request): Application|\Illuminate\Http\Response|ResponseFactory
+    {
         if ($request->isMethod('get')) {
             Log::info('Webhook Verification Request:', $request->all());
 
@@ -252,133 +258,137 @@ class WhatsappService
             $stage = $customer->conversation_stage ?? 0;
             $conversation_data = $customer->message_json ?? "";
 
-            if ($customer->completed_onboarding) {
-                $this->saveMessage($customer->id, $incomingMessage, "received", time());
-                $aiMessage = $this->generateAIResponse($incomingMessage);
-                $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+            if ($customer->stopChat) {
                 return;
-            }
-
-            switch ($stage) {
-                case 0:
-                    $this->sendMessage($customer->phone, "Welcome! What is your name?", $customer->id, []);
-                    $customer->update(['conversation_stage' => 1]);
-                    break;
-
-                case 1:
-                    $conversation_data .= "Name: $incomingMessage\n";
-                    $customer->name = $incomingMessage;
-                    $customer->save();
+            }else {
+                if ($customer->completed_onboarding) {
                     $this->saveMessage($customer->id, $incomingMessage, "received", time());
+                    $aiMessage = $this->generateAIResponse($incomingMessage);
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+                    return;
+                }
 
-                    $this->sendMessage($customer->phone, "Where are you chatting from?", $customer->id, []);
-                    $customer->update(['conversation_stage' => 2, "message_json" => $conversation_data]);
-                    break;
+                switch ($stage) {
+                    case 0:
+                        $this->sendMessage($customer->phone, "Welcome! What is your name?", $customer->id, []);
+                        $customer->update(['conversation_stage' => 1]);
+                        break;
 
-                case 2:
-                    $conversation_data .= "Location: $incomingMessage\n";
-                    $customer->location = $incomingMessage;
-                    $customer->save();
-                    $products = Product::all();
-                    $buttons = [];
+                    case 1:
+                        $conversation_data .= "Name: $incomingMessage\n";
+                        $customer->name = $incomingMessage;
+                        $customer->save();
+                        $this->saveMessage($customer->id, $incomingMessage, "received", time());
 
-                    foreach ($products as $product) {
-                        $buttons[] = [
-                            'type' => 'reply',
-                            'reply' => [
-                                'id' => $product->id,
-                                'title' => $product->name,
-                            ],
-                        ];
-                    }
-                    $this->saveMessage($customer->id, $incomingMessage, "received", time());
+                        $this->sendMessage($customer->phone, "Where are you chatting from?", $customer->id, []);
+                        $customer->update(['conversation_stage' => 2, "message_json" => $conversation_data]);
+                        break;
 
-                    $this->sendMessage($customer->phone, "What type of stove do you use?", $customer->id, $buttons);
-                    $customer->update(['conversation_stage' => 3, "message_json" => $conversation_data]);
-                    break;
+                    case 2:
+                        $conversation_data .= "Location: $incomingMessage\n";
+                        $customer->location = $incomingMessage;
+                        $customer->save();
+                        $products = Product::all();
+                        $buttons = [];
 
-                case 3:
-                    $productName = Product::where("id", $incomingMessage)->first()->name;
-                    $conversation_data .= "Selected Product Name: $productName\n";
-                    $this->saveMessage($customer->id, $productName, "received", time());
-                    $customer->update(['selected_product_id' => $incomingMessage, "message_json" => $conversation_data]);
-
-                    $questions = $this->loadProductQuestions($incomingMessage);
-
-                    if (!empty($questions)) {
-                        $nextQuestion = $questions[0]['question'];
-                        $this->sendMessage($customer->phone, $nextQuestion, $customer->id, []);
-
-                        $customer->update([
-                            'conversation_stage' => 4,
-                            'current_question_index' => 1,
-                            'questions_json' => json_encode($questions),
-                            "message_json" => $conversation_data,
-                        ]);
-                    } else {
-                        $this->sendMessage($customer->phone, "No questions for this product.", $customer->id, []);
-                        $customer->update([
-                            'conversation_stage' => 6,
-                            'questions_json' => null,
-                            'current_question_index' => null,
-                            'message_json' => null,
-                        ]);
-                    }
-                    break;
-
-                case 4:
-                    $questions = json_decode($customer->questions_json, true) ?? [];
-                    $currentQuestionIndex = $customer->current_question_index ?? 0;
-
-                    if ($currentQuestionIndex < count($questions)) {
-                        if ($currentQuestionIndex > 0) {
-                            $question = $questions[$currentQuestionIndex - 1]['question'];
-                            $conversation_data .= "$question: $incomingMessage\n";
+                        foreach ($products as $product) {
+                            $buttons[] = [
+                                'type' => 'reply',
+                                'reply' => [
+                                    'id' => $product->id,
+                                    'title' => $product->name,
+                                ],
+                            ];
                         }
                         $this->saveMessage($customer->id, $incomingMessage, "received", time());
 
-                        $nextQuestion = $questions[$currentQuestionIndex]['question'];
-                        $this->sendMessage($customer->phone, $nextQuestion, $customer->id, []);
+                        $this->sendMessage($customer->phone, "What type of stove do you use?", $customer->id, $buttons);
+                        $customer->update(['conversation_stage' => 3, "message_json" => $conversation_data]);
+                        break;
+
+                    case 3:
+                        $productName = Product::where("id", $incomingMessage)->first()->name;
+                        $conversation_data .= "Selected Product Name: $productName\n";
+                        $this->saveMessage($customer->id, $productName, "received", time());
+                        $customer->update(['selected_product_id' => $incomingMessage, "message_json" => $conversation_data]);
+
+                        $questions = $this->loadProductQuestions($incomingMessage);
+
+                        if (!empty($questions)) {
+                            $nextQuestion = $questions[0]['question'];
+                            $this->sendMessage($customer->phone, $nextQuestion, $customer->id, []);
+
+                            $customer->update([
+                                'conversation_stage' => 4,
+                                'current_question_index' => 1,
+                                'questions_json' => json_encode($questions),
+                                "message_json" => $conversation_data,
+                            ]);
+                        } else {
+                            $this->sendMessage($customer->phone, "No questions for this product.", $customer->id, []);
+                            $customer->update([
+                                'conversation_stage' => 6,
+                                'questions_json' => null,
+                                'current_question_index' => null,
+                                'message_json' => null,
+                            ]);
+                        }
+                        break;
+
+                    case 4:
+                        $questions = json_decode($customer->questions_json, true) ?? [];
+                        $currentQuestionIndex = $customer->current_question_index ?? 0;
+
+                        if ($currentQuestionIndex < count($questions)) {
+                            if ($currentQuestionIndex > 0) {
+                                $question = $questions[$currentQuestionIndex - 1]['question'];
+                                $conversation_data .= "$question: $incomingMessage\n";
+                            }
+                            $this->saveMessage($customer->id, $incomingMessage, "received", time());
+
+                            $nextQuestion = $questions[$currentQuestionIndex]['question'];
+                            $this->sendMessage($customer->phone, $nextQuestion, $customer->id, []);
+
+                            $customer->update([
+                                'conversation_stage' => $stage,
+                                'current_question_index' => $currentQuestionIndex + 1,
+                                'message_json' => $conversation_data,
+                            ]);
+                        } else {
+                            $customer->update(['conversation_stage' => 6]);
+                            $this->handleConversation($customer, $incomingMessage);
+                        }
+                        break;
+
+                    case 6:
+                        $conversation_data .= "$incomingMessage\n";
+                        $this->saveMessage($customer->id, $incomingMessage, "received", time());
+
+                        $aiMessage = $this->generateAIResponse($conversation_data);
+                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+                        $image = $this->imageGenerator->createStyledCalendarImage("2024-10-23", "10:45pm", []);
+                        $this->sendMessage($customer->phone, "Now you can schedule a message. What date and time would you like?", $customer->id, [], $image);
 
                         $customer->update([
-                            'conversation_stage' => $stage,
-                            'current_question_index' => $currentQuestionIndex + 1,
+                            'conversation_stage' => 5,
+                            'questions_json' => null,
+                            'current_question_index' => null,
                             'message_json' => $conversation_data,
                         ]);
-                    } else {
-                        $customer->update(['conversation_stage' => 6]);
-                        $this->handleConversation($customer, $incomingMessage);
-                    }
-                    break;
+                        break;
 
-                case 6:
-                    $conversation_data .= "$incomingMessage\n";
-                    $this->saveMessage($customer->id, $incomingMessage, "received", time());
+                    case 5:
 
-                    $aiMessage = $this->generateAIResponse($conversation_data);
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-                    $image = $this->imageGenerator->createStyledCalendarImage("2024-10-23", "10:45pm", []);
-                    $this->sendMessage($customer->phone, "Now you can schedule a message. What date and time would you like?", $customer->id, [], $image);
+                        $customer->update([
+                            'completed_onboarding' => true,
+                            'conversation_stage' => 0,
+                            'message_json' => null,
+                        ]);
+                        break;
 
-                    $customer->update([
-                        'conversation_stage' => 5,
-                        'questions_json' => null,
-                        'current_question_index' => null,
-                        'message_json' => $conversation_data,
-                    ]);
-                    break;
-
-                case 5:
-
-                    $customer->update([
-                        'completed_onboarding' => true,
-                        'conversation_stage' => 0,
-                        'message_json' => null,
-                    ]);
-                    break;
-
-                default:
-                    $this->sendMessage($customer->phone, "I'm here to help! Type 'schedule' to set a message or 'chat' to talk with AI.", $customer->id, []);
+                    default:
+                        $this->sendMessage($customer->phone, "I'm here to help! Type 'schedule' to set a message or 'chat' to talk with AI.", $customer->id, []);
+                }
             }
         } catch (Exception $e) {
             Log::error('Error handling conversation: ' . $e->getMessage());
@@ -401,6 +411,44 @@ class WhatsappService
         return ProductQuestion::where('product_id', $product->id)->get()->toArray();
     }
 
+    /**
+     * @throws ConnectionException
+     */
+    public function sendUserMessage(Request $request): \Illuminate\Http\JsonResponse
+    {
+   try {
+       $message = $request->input("message");
+
+       $customer = Customer::where('id', $request->input("customer_id"))->first();
+       $message_json = $customer->message_json . ' ' . $message;
+       $this->sendMessage($customer->phone, $message, $customer->id, []);
+       $customer->update([
+           'message_json' => $message_json,
+       ]);
+       return ResponseUtils::respondWithSuccess("",ResponseAlias::HTTP_OK);
+   }catch (Exception $e){
+       return ResponseUtils::respondWithError($e->getMessage(), ResponseAlias::HTTP_OK);
+   }
+    }
+
+    public function stopAiMessage(Request $request):JsonResponse
+    {
+        try {
+            $userAuth = CustomerUtils::getJWTUser();
+            Log::info("Data: ", (array)$userAuth);
+
+            $user = User::where("email",$userAuth->email)->first();
+            if ($user == null) {
+                return ResponseUtils::respondWithError('User not found '.$userAuth->email, \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
+            }
+            $customer = Customer::where('id', $request->input("customer_id"))->first();
+            $customer->stopChat=true;
+            $customer->save();
+            return ResponseUtils::respondWithSuccess("AI Chat Stop for ".$customer->name,ResponseAlias::HTTP_OK);
+        }catch (Exception $e){
+            return ResponseUtils::respondWithError($e->getMessage(), ResponseAlias::HTTP_OK);
+        }
+    }
 
 
 }

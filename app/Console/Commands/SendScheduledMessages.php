@@ -29,14 +29,16 @@ class SendScheduledMessages extends Command
     public function handle(): void
     {
         $today = Carbon::today()->toDateString();
-        $scheduledMessages = ScheduledMessage::where('scheduled_date', $today)
-            ->where('status', 'pending')
-            ->get();
+        $scheduledMessages = ScheduledMessage::all();
+        $cus = Customer::all();
 
         Log::info("Today");
+        Log::info($today);
+        Log::info($scheduledMessages);
+        Log::info($cus);
 
         foreach ($scheduledMessages as $scheduledMessage) {
-            $cus = Customer::all();
+
             foreach ($cus as $customer) {
             if ($customer) {
                 $this->whatsappService->sendMessage($customer->phone, $scheduledMessage->message_content, $customer->id, []);

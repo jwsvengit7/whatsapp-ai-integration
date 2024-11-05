@@ -29,8 +29,6 @@ const props = defineProps({
 
 <template>
     <aside :class="['iaside', { 'is-visible': props.isSidebarVisible }]">
-
-
        <div style="display: flex;width: 100%;justify-content: space-between;align-items: center">
            <img src="https://uat.smefunds.com/public/images/kike-logo.png" width="100">
            <button class="btn" style="padding-right: 10px;color:white;background: unset;border: 0px " @click="toggleSidebar">Close</button>
@@ -52,12 +50,8 @@ const props = defineProps({
                     <span><span class="i1 fas fa-users"></span><span class="i">My Customers</span></span>
                 </router-link>
             </div>
-
-
-
             <div class="nav-content">
                 <router-link to="/dashboard/chat-feature">
-
                     <span><span class="i1 fas fa-message"></span><span class="i">Fuel Available</span></span>
                 </router-link>
             </div>
@@ -96,13 +90,8 @@ const props = defineProps({
                 </router-link>
             </div>
             <div class="nav-content logout">
-
-
                     <span v-on:click="logout"><span  class="fas fa-sign-out"></span>Sign out</span>
-
             </div>
-
-
         </nav>
 
     </aside>
@@ -124,6 +113,14 @@ const props = defineProps({
 .mainAside{
     display: block !important;
 }
+.btn{
+    display: none;
+}
+@media (max-width: 800px) {
+    .btn{
+        display: block;
+    }
 
+}
 
 </style>

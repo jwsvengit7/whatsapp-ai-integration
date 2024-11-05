@@ -432,8 +432,7 @@ export default {
         };
 
         const handleError = (error) => {
-            const errorMessage = error.response?.data?.message || 'An error occurred. Please try again.';
-            errors.value = errorMessage;
+            errors.value = error.response?.data?.message || 'An error occurred. Please try again.';
             showError(errors.value);
         };
 

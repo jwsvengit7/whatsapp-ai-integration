@@ -44,6 +44,8 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     Route::get("fetch-chat",[AdminController::class,"fetchConversation"]);
     Route::post("schedule-message",[AdminController::class,"createScheduledMessage"]);
     Route::get("/image",[AdminController::class,"generateCalendarGif"]);
+    Route::get("/message",[WhatsAppController::class,"sendUserMessage"]);
+    Route::get("/stop-ai",[WhatsAppController::class,"stopAiMessage"]);
 
     // Webhook Endpoints
     Route::match(['get', 'post'], '/webhook', [WhatsAppController::class, 'handleWebhook']);

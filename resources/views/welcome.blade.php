@@ -14,15 +14,6 @@
 
 <div id="app">
 </div>
-<style>
-    @media (max-width: 600px) {
 
-
-        .iaside {
-width: 60% !important;
-            position: fixed;
-        }
-    }
-</style>
 </body>
 </html>

@@ -75,7 +75,6 @@ export default {
 
             <div class="box-container">
                 <div class="chat-room">
-                    <!-- Show loading spinner -->
                     <div v-if="loading" class="loading">Loading...</div>
 
                     <div v-if="error" class="error">{{ error }}</div>

@@ -28,7 +28,7 @@ const props = defineProps({
 </template>
 
 
-<style scoped>
+<style >
 .box-div{
     width:100%;
     height: 600px;
@@ -37,7 +37,7 @@ const props = defineProps({
     flex-wrap: wrap;
 }
 .box {
-    width: 200px;
+    width: 30%;
     height: 250px;
     border-radius: 10px;
     border: 1px solid #ccc;
@@ -63,5 +63,13 @@ const props = defineProps({
     font-weight: bold;
     font-size: 20px;
     }
+
+@media (max-width: 800px) {
+    .box{
+        width: 38% !important;
+        height: 180px;
+    }
+
+}
 
 </style>

@@ -18,6 +18,7 @@ class Customer extends Model
         'phone',
         'email',
         'conversation_stage',
+        'stopChat',
         'completed_onboarding',
         'location',
         'message_json',
@@ -26,7 +27,6 @@ class Customer extends Model
         'message_branch',
         'current_question_index'
     ];
-
 
     /**
      * Get the conversations for the customer.

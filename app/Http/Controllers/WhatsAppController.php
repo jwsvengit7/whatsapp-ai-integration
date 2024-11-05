@@ -24,7 +24,7 @@ class WhatsAppController extends BaseController
     /**
      * @throws \Exception
      */
-    public function handleWebhook(Request $request)
+    public function handleWebhook(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory|null
     {
         return $this->whatsappService->receiveMessage($request);
     }
@@ -37,4 +37,21 @@ class WhatsAppController extends BaseController
     {
         return $this->whatsappService->generateAIResponse($request);
     }
+
+/**
+ * @throws ConnectionException
+ * @throws \Exception
+ */
+    public function sendUserMessage(Request $request): \Illuminate\Http\JsonResponse
+    {
+
+        return $this->whatsappService->sendUserMessage($request);
+    }
+
+    public function stopAiMessage(Request $request): \Illuminate\Http\JsonResponse
+    {
+        return $this->whatsappService->stopAiMessage($request);
+    }
+
+
 }

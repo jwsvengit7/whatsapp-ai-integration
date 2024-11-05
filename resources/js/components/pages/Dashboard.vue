@@ -11,14 +11,14 @@
                 <div class="wrap">
 
 
-                <div class="box">
+                <div class="box-items">
                     <span class="fa fa-users size"></span>
 
                     <span class="nu">11</span>
                     <span class="text">Total Users</span>
 
                 </div>
-                <div class="box">
+                <div class="box-items">
                     <span class="fa fa-users size"></span>
 
                     <span class="nu">ACTIVE</span>
@@ -59,10 +59,10 @@ export default {
 </script>
 
 <style>
-.box{
+.box-items{
     width:170px;
     height: 170px;
-    box-shadow: 0px 0px 3px 1px #ddd;
+    box-shadow: 0 0 3px 1px #ddd;
     border-radius: 10px;
     padding: 10px;
     display: flex;
@@ -74,7 +74,6 @@ export default {
 .wrap{
     display: flex;
     flex-wrap: wrap;
-
  }
 .size{
     font-size: 30px;
