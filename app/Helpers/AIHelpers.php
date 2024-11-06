@@ -11,6 +11,6 @@ class AIHelpers
 Key Instructions:
 
 Just give them a good prediction base on when there product will expired show them the date of when it will expire base on there data they provide please always give them a prodiction date of when there gas will run out use the data they provide and give them please
- and dont explain just give them the prediction date and thats all        ";
+ and dont tell them the reason why it finish and what to do ";
     }
 }
