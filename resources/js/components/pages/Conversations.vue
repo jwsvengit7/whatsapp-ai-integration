@@ -43,10 +43,12 @@ export default {
         },
 
         async stopMessage() {
+            const data={
+                customer_id: new URLSearchParams(window.location.search).get('id')
+            }
             try {
-                const response = await axios.post('/stop-ai', {
-                    customer_id: new URLSearchParams(window.location.search).get('id')
-                });
+                console.log(data)
+                const response = await axios.post('/stop-ai', data);
 
                 await this.handleResponse(response, "Successfully Stopped KIKO AI");
             } catch (error) {

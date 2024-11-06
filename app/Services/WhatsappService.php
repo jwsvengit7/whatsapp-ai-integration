@@ -366,8 +366,11 @@ class WhatsappService
 
                         $aiMessage = $this->generateAIResponse($conversation_data);
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-                        $image = $this->imageGenerator->createStyledCalendarImage("2024-10-23", "10:45pm", []);
-                        $this->sendMessage($customer->phone, "Now you can schedule a message. What date and time would you like?", $customer->id, [], $image);
+                        $imageGenerator = new ImageGenerator();
+                        $filePath = $imageGenerator->createCalendarImage(date("Y"), date("m")); // Example with current year/month
+                        $imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVn4qoj8adn2HTeVgwTJdsgofOtjqY8yKBjQ&s";
+
+                        $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $imageUrl);
 
                         $customer->update([
                             'conversation_stage' => 5,
@@ -434,15 +437,6 @@ class WhatsappService
     public function stopAiMessage(Request $request): JsonResponse
     {
         try {
-            $userAuth = CustomerUtils::getJWTUser();
-            Log::info('Authenticated User:', ['email' => $userAuth->email]);
-            $user = User::where('email', $userAuth->email)->first();
-            if ($user === null) {
-                return ResponseUtils::respondWithError(
-                    'User not found with email: ' . $userAuth->email,
-                    ResponseAlias::HTTP_NOT_FOUND
-                );
-            }
 
             $customer = Customer::where('id', $request->input('customer_id'))->first();
 
@@ -452,7 +446,6 @@ class WhatsappService
                     ResponseAlias::HTTP_NOT_FOUND
                 );
             }
-
             $customer->stopChat = true;
             $customer->save();
 

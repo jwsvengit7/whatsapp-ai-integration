@@ -7,10 +7,9 @@
     "require": {
         "php": "^8.2",
         "ext-calendar": "*",
-
         "ext-gd": "*",
         "cloudinary-labs/cloudinary-laravel": "^2.2",
-        "intervention/image": "^3.9",
+        "intervention/image": "*",
         "laravel/framework": "^11.27.2",
         "laravel/jetstream": "^5.2",
         "laravel/sanctum": "^4.0",
