@@ -431,24 +431,44 @@ class WhatsappService
    }
     }
 
-    public function stopAiMessage(Request $request):JsonResponse
+    public function stopAiMessage(Request $request): JsonResponse
     {
         try {
             $userAuth = CustomerUtils::getJWTUser();
-            Log::info("Data: ", (array)$userAuth);
-
-            $user = User::where("email",$userAuth->email)->first();
-            if ($user == null) {
-                return ResponseUtils::respondWithError('User not found '.$userAuth->email, \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
+            Log::info('Authenticated User:', ['email' => $userAuth->email]);
+            $user = User::where('email', $userAuth->email)->first();
+            if ($user === null) {
+                return ResponseUtils::respondWithError(
+                    'User not found with email: ' . $userAuth->email,
+                    ResponseAlias::HTTP_NOT_FOUND
+                );
             }
-            $customer = Customer::where('id', $request->input("customer_id"))->first();
-            $customer->stopChat=true;
+
+            $customer = Customer::where('id', $request->input('customer_id'))->first();
+
+            if ($customer === null) {
+                return ResponseUtils::respondWithError(
+                    'Customer not found with ID: ' . $request->input('customer_id'),
+                    ResponseAlias::HTTP_NOT_FOUND
+                );
+            }
+
+            $customer->stopChat = true;
             $customer->save();
-            return ResponseUtils::respondWithSuccess("AI Chat Stop for ".$customer->name,ResponseAlias::HTTP_OK);
-        }catch (Exception $e){
-            return ResponseUtils::respondWithError($e->getMessage(), ResponseAlias::HTTP_OK);
+
+            return ResponseUtils::respondWithSuccess(
+                "AI Chat has been stopped for customer: " . $customer->name,
+                ResponseAlias::HTTP_OK
+            );
+
+        } catch (Exception $e) {
+            Log::error('Error in stopping AI chat: ' . $e->getMessage(), ['exception' => $e]);
+
+            return ResponseUtils::respondWithError(
+                'An error occurred while stopping AI chat: ' . $e->getMessage(),
+                ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
+
     }
-
-
 }
