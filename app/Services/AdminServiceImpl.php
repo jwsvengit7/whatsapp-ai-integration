@@ -190,15 +190,13 @@ class AdminServiceImpl implements AdminService
     public function createContext(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = CustomerUtils::getJWTUser();
-
-        if ($user == null) {
-            return ResponseUtils::respondWithError("User not found.", Response::HTTP_NOT_FOUND);
+        if ($user==null) {
+            return ResponseUtils::respondWithError("User not found. ", 404);
         }
 
-        if ($user->role == UserRole::SUPER_ADMIN) {
-            return ResponseUtils::respondWithError("You don't have permissions to access conversations", Response::HTTP_UNAUTHORIZED);
+        if ($user->role !== UserRole::ADMIN && $user->role !== UserRole::SUPER_ADMIN) {
+            return ResponseUtils::respondWithError("User does not have permissions to add product.", 403);
         }
-
         $existingAi = AI::where('context', '')->first();
 
         if ($existingAi) {
