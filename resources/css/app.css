@@ -259,6 +259,13 @@ nav{
     .is-visible{
         display: block;
     }
+    .left{
+        display: none;
+    }
+    .right{
+       width: 90%;
+        padding: 20px;
+    }
 
 }
 

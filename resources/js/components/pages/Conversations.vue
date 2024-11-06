@@ -7,6 +7,7 @@ import Utils from "../../Utils.js";
 import {onMounted, ref} from "vue";
 import pic from "../../../../public/images/kike-logo.png";
 import axios from "../../axios.js";
+import Swal from "sweetalert2";
 const isSidebarVisible = ref(false); // Ref to control sidebar visibility
 
 const toggleSidebar = function () {
@@ -26,12 +27,12 @@ export default {
         async sendMessage() {
             if (this.newMessage.trim() === '') return;
             try {
-                const response = await axios.post('/send-message', {
+                const response = await axios.post('/message', {
                     message: this.newMessage,
-                    conversationId: this.id  // Access id from the component
+                    customer_id: new URLSearchParams(window.location.search).get('id')
                 });
                 if (response.status === 200) {
-                    this.newMessage = '';  // Clear message input on success
+                    this.newMessage = '';
                 } else {
                     this.error = 'Failed to send message.';
                 }
@@ -40,7 +41,25 @@ export default {
                 this.error = 'Failed to send message. Please try again.';
             }
         },
+
+        async stopMessage(){
+
+            try {
+                const response = await axios.post('/stop-ai', {
+                    customer_id: new URLSearchParams(window.location.search).get('id')
+                });
+
+                await this.handleResponse(response);
+            } catch (error) {
+                this.handleError(error);
+            } finally {
+                this.loading.value = false;
+            }
+        },
+
     },
+
+
     setup() {
         const { loadUser, allConversation, loadAllConversation, user, loading, error } = useUser();
         const utils = new Utils();
@@ -48,6 +67,37 @@ export default {
         const id = ref('');
         const phone = ref('');
         const name = ref('');
+
+
+        const handleResponse = async (response) => {
+            if ([200, 201].includes(response.status)) {
+                await Swal.fire({
+                    title: 'Success!',
+                    text: 'Product created successfully',
+                    icon: 'success',
+                    confirmButtonText: 'Okay'
+                });
+
+            } else {
+                await showError('An unexpected error occurred.');
+            }
+        };
+
+        const handleError = (error) => {
+            const errorMessage = error.response?.data?.message || 'An error occurred. Please try again.';
+            const validationErrors = error.response?.data?.errors || {};
+
+            showError(Object.values(validationErrors).flat()[0] || errorMessage);
+        };
+
+        const showError = async (message) => {
+            await Swal.fire({
+                title: 'Error!',
+                text: message,
+                icon: 'error',
+                confirmButtonText: 'Okay'
+            });
+        };
 
         onMounted(() => {
             loadUser();
@@ -62,7 +112,7 @@ export default {
             }
         });
 
-        return { user,phone,name, utils, allConversation, loading, error, pic, id,isSidebarVisible,toggleSidebar };
+        return { user,phone,name, utils, allConversation, loading, error, pic, id,isSidebarVisible,toggleSidebar,handleResponse ,handleError};
     }
 }
 </script>
@@ -102,13 +152,16 @@ export default {
 
                     <!-- Send Message Input -->
                     <div class="message-input-container">
-                        <input
-                            type="text"
+                        <textarea
+                            rows=4
+                            cols="50"
                             v-model="newMessage"
+                            class="texta"
                             placeholder="Type a message..."
                             @keyup.enter="sendMessage"
-                        />
-                        <button @click="sendMessage">Send</button>
+                        ></textarea>
+                        <button class="btn-chat" @click="sendMessage">Send</button>
+                        <button type="button" class="btn-chat" @click="stopMessage">Stop</button>
                     </div>
                 </div>
             </div>
@@ -117,6 +170,10 @@ export default {
 </template>
 
 <style scoped>
+.texta{
+    border: 1px solid #ddd;
+    margin: 5px;
+}
 .box-container{
     height: 80%;
 }
