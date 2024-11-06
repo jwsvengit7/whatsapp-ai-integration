@@ -29,6 +29,14 @@ class AdminController extends BaseController
     {
         return $this->service->createProduct($request);
     }
+    public function createContext(Request $request): JsonResponse
+    {
+        return $this->service->createContext($request);
+    }
+    public function getContext(): JsonResponse
+    {
+        return $this->service->getContext();
+    }
     public function createAdmin(Request $request): JsonResponse
     {
         return $this->service->createAdmin($request);

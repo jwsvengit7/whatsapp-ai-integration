@@ -5,7 +5,8 @@ import {
     fetchAllUser,
     fetchAllCustomers,
     fetchAllProduct,
-    fetchAllConversation
+    fetchAllConversation,
+    fetchContext
 } from "./components/services/userService.js";
 
 export const useUserStore = defineStore('user', {
@@ -15,6 +16,7 @@ export const useUserStore = defineStore('user', {
         allCustomer:[],
         allProduct:[],
         allConversations:[],
+        context:{},
         loading: false,
         error: null,
     }),
@@ -25,6 +27,20 @@ export const useUserStore = defineStore('user', {
             try {
                 const response = await fetchUser(token);
                 this.user = response.data.message;
+
+            } catch (err) {
+                this.error = 'Check your internet connections';
+                console.error(err);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async loadContext(token) {
+            this.loading = true;
+            this.error = null;
+            try {
+                const response = await fetchContext(token);
+                this.context = response.data.message;
 
             } catch (err) {
                 this.error = 'Check your internet connections';

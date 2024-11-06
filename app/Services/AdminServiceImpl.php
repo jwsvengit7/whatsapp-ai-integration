@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+use App\Models\AI;
 use Illuminate\Support\Facades\Storage;
 use App\Enums\Status;
 use App\Enums\UserRole;
@@ -21,7 +22,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminServiceImpl implements AdminService
 {
-
 
     /**
      * @throws Exception
@@ -182,6 +182,62 @@ class AdminServiceImpl implements AdminService
         $conversations = Conversation::all();
         return ResponseUtils::respondWithSuccess($conversations->toArray(), Response::HTTP_OK);
     }
+
+
+    /**
+     * @throws Exception
+     */
+    public function createContext(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = CustomerUtils::getJWTUser();
+
+        if ($user == null) {
+            return ResponseUtils::respondWithError("User not found.", Response::HTTP_NOT_FOUND);
+        }
+
+        if ($user->role == UserRole::SUPER_ADMIN) {
+            return ResponseUtils::respondWithError("You don't have permissions to access conversations", Response::HTTP_UNAUTHORIZED);
+        }
+
+        $existingAi = AI::where('context', '')->first();
+
+        if ($existingAi) {
+            $existingAi->context = $request->input("context");
+            $existingAi->save();
+            return ResponseUtils::respondWithSuccess($existingAi, Response::HTTP_OK);
+        } else {
+            $ai = AI::create([
+                "context" => $request->input("context"),
+            ]);
+            return ResponseUtils::respondWithSuccess($ai, Response::HTTP_CREATED);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getContext(): \Illuminate\Http\JsonResponse
+    {
+        $user = CustomerUtils::getJWTUser();
+
+        if ($user == null) {
+            return ResponseUtils::respondWithError("User not found.", Response::HTTP_NOT_FOUND);
+        }
+
+        if ($user->role == UserRole::SUPER_ADMIN) {
+            return ResponseUtils::respondWithError("You don't have permissions to access conversations", Response::HTTP_UNAUTHORIZED);
+        }
+
+        $existingAi = AI::where('context', '')->first();
+
+        if ($existingAi) {
+            return ResponseUtils::respondWithSuccess($existingAi, Response::HTTP_OK);
+        } else {
+
+            return ResponseUtils::respondWithSuccess("No Context", Response::HTTP_CREATED);
+        }
+    }
+
 
     public function createScheduledMessage(Request $request): \Illuminate\Http\JsonResponse
     {

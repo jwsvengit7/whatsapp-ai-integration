@@ -18,6 +18,7 @@ import EducateAI from "./components/pages/EducateAI.vue";
 import Conversations from "./components/pages/Conversations.vue";
 import MyCustomer from "./components/pages/MyCustomer.vue";
 import LoginPage from "./components/pages/LoginPage.vue";
+import Context from "./components/pages/Context.vue";
 
 const routes = [
     { path: '/', component: LoginPage, name: 'LoginPage' },
@@ -36,6 +37,7 @@ const routes = [
     { path: '/dashboard/create-product', component: CreateProduct, name: 'CreateProduct' },
     { path: '/dashboard/all-product', component: AllProduct, name: 'AllProduct' },
     { path: '/dashboard/ai', component: AI_Model, name: 'AI_MODEL' },
+    { path: '/dashboard/context', component: Context, name: 'Context' },
     { path: '/dashboard/educate-ai', component: EducateAI, name: 'EducateAI' },
     { path: '/dashboard/view-conversations', component: Conversations, name: 'Conversations' },
     { path: '/dashboard/my-customer', component: MyCustomer, name: 'MyCustomer' },

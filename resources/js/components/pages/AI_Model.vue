@@ -8,9 +8,7 @@
                 <div class="box-div">
                     <div class="box">
                         <img src="https://uat.smefunds.com/public/images/kike-logo.png" alt="" width="20" height="20"  onclick="window.location.href='educate-ai?name=Fuel'"/>
-
-
-
+                        <router-link to="/dashboard/context">Context</router-link>
                     </div>
 
 

@@ -8,6 +8,14 @@ export const fetchUser = async (token) => {
         }
     });
 };
+
+export const fetchContext = async (token) => {
+    return await axios.get('/context', {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
 export const fetchAllUser =async (token)=>{
     return await axios.get('/all-users', {
         headers: {

@@ -13,6 +13,14 @@ export const useUser = () => {
         console.log("User data loaded:", store.user);
     };
 
+    const loadContext = async () => {
+        loading.value = true;
+        const token = localStorage.getItem("token");
+        await store.loadContext(token);
+        loading.value = false;
+        console.log("User data loaded:", store.context);
+    };
+
     const loadAllUsers = async () => {
         loading.value = true;
         const token = localStorage.getItem("token");
@@ -49,7 +57,8 @@ export const useUser = () => {
     const allCustomers = computed(() => store.allCustomer);
     const allProduct = computed(() => store.allProduct);
     const allConversation = computed(() => store.allConversations);
+    const allContext = computed(() => store.context);
     const error = computed(() => store.error);
 
-    return { loadUser,loadAllUsers,loadAllCustomers,loadAllProduct,loadAllConversation,allConversation, user,allUsers,allCustomers,allProduct, loading, error };
+    return { loadUser,loadAllUsers,loadAllCustomers,loadAllProduct,loadAllConversation,loadContext,allConversation,allContext, user,allUsers,allCustomers,allProduct, loading, error };
 };
