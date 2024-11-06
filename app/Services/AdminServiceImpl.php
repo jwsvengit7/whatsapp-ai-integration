@@ -189,25 +189,29 @@ class AdminServiceImpl implements AdminService
      */
     public function createContext(Request $request): \Illuminate\Http\JsonResponse
     {
-        $user = CustomerUtils::getJWTUser();
-        if ($user==null) {
-            return ResponseUtils::respondWithError("User not found. ", 404);
-        }
+        try {
+            $user = CustomerUtils::getJWTUser();
+            if ($user == null) {
+                return ResponseUtils::respondWithError("User not found. ", 404);
+            }
 
-        if ($user->role !== UserRole::ADMIN && $user->role !== UserRole::SUPER_ADMIN) {
-            return ResponseUtils::respondWithError("User does not have permissions to add product.", 403);
-        }
-        $existingAi = AI::where('context', '')->first();
-
-        if ($existingAi) {
-            $existingAi->context = $request->input("context");
-            $existingAi->save();
-            return ResponseUtils::respondWithSuccess($existingAi, Response::HTTP_OK);
-        } else {
-            $ai = AI::create([
-                "context" => $request->input("context"),
-            ]);
-            return ResponseUtils::respondWithSuccess($ai, Response::HTTP_CREATED);
+            if ($user->role !== UserRole::SUPER_ADMIN) {
+                return ResponseUtils::respondWithError("User does not have permissions to add product.", 403);
+            }
+            $existingAi = AI::where('context', '')->first();
+            if ($existingAi) {
+                $existingAi->context = $request->input("context");
+                $existingAi->save();
+                return ResponseUtils::respondWithSuccess($existingAi, Response::HTTP_OK);
+            } else {
+                $ai = AI::create([
+                    "context" => $request->input("context"),
+                ]);
+                return ResponseUtils::respondWithSuccess($ai, Response::HTTP_CREATED);
+            }
+        }catch(Exception $e){
+            return ResponseUtils::respondWithError($e->getMessage(),
+                Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
