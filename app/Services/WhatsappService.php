@@ -28,11 +28,11 @@ use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 class WhatsappService
 {
     protected array $processedMessageIds = [];
-    private ImageGenerator $imageGenerator;
+
 
     public function __construct()
     {
-        $this->imageGenerator = new ImageGenerator();
+
     }
 
     /**
