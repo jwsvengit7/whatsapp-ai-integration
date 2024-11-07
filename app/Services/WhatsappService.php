@@ -11,7 +11,9 @@ use App\Models\Conversation;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\ProductQuestion;
+use App\Models\ScheduledMessage;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Foundation\Application;
@@ -464,4 +466,34 @@ class WhatsappService
         }
 
     }
+
+    /**
+     * @throws ConnectionException
+     */
+    public function cron_job(): void
+    {
+        $today = Carbon::today()->toDateString();
+        $scheduledMessages = ScheduledMessage::whereDate('scheduled_date', $today)->get();
+        $customers = Customer::all();
+
+        Log::info("Today's Date: $today");
+        Log::info("Scheduled Messages for Today", $scheduledMessages->toArray());
+        Log::info("Customer List", $customers->toArray());
+
+        foreach ($scheduledMessages as $scheduledMessage) {
+            foreach ($customers as $customer) {
+                Log::info("Message sent to {$customer->phone}");
+                if ($customer) {
+                    $this->sendMessage($customer->phone, $scheduledMessage->message_content, $customer->id, []);
+
+                    // Update message status to 'sent'
+                    $scheduledMessage->status = 'sent';
+                    $scheduledMessage->save();
+
+                    Log::info("Message sent to {$customer->phone}");
+                }
+            }
+        }
+    }
+
 }

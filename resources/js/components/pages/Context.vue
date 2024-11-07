@@ -13,6 +13,13 @@
 
 
 
+
+                        <div class="information">
+                            <label>Description&nbsp;<span>*</span></label>
+                            <p class="information-textarea"  >{{allContext.context}}</p>
+                        </div>
+
+
                         <div class="information">
                             <label>Description&nbsp;<span>*</span></label>
                             <textarea class="information-textarea" name="description" v-model="description"></textarea>
@@ -57,13 +64,10 @@ export default {
 
 
 
-
-
         const createContext = async () => {
             loadings.value = true;
             errors.value = '';
             const data =  {context:description.value}
-
 
             try {
                 const response = await axios.post('/create-context',data

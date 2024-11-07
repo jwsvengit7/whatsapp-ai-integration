@@ -52,6 +52,10 @@ class WhatsAppController extends BaseController
     {
         return $this->whatsappService->stopAiMessage($request);
     }
+    public function cron_job(): \Illuminate\Http\JsonResponse
+    {
+        return $this->whatsappService->cron_job();
+    }
 
 
 }
