@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
     {
         Log::info("Logger");
         $schedule->command('messages:send-scheduled')->everyMinute();
+        $schedule->command('messages:send-scheduled')->everyMinute();
     }
 
     /**

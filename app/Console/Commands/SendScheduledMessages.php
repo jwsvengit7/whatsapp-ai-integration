@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 use App\Services\WhatsappService;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Log;
 
 class SendScheduledMessages extends Command
 {
@@ -24,8 +25,9 @@ class SendScheduledMessages extends Command
      */
     public function handle(): void
     {
-        $this->whatsappService->cron_job();
-
+        Log::info("Message sent");
+       $message= $this->whatsappService->cron_job();
+        Log::info("Message ".$message);
     }
 
 
