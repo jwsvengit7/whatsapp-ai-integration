@@ -470,7 +470,7 @@ class WhatsappService
     /**
      * @throws ConnectionException
      */
-    public function cron_job(): void
+    public function cron_job(): string
     {
         $today = Carbon::today()->toDateString();
         $scheduledMessages = ScheduledMessage::whereDate('scheduled_date', $today)->get();
@@ -494,6 +494,7 @@ class WhatsappService
                 }
             }
         }
+        return "Cron has run";
     }
 
 }
