@@ -17,8 +17,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         Log::info("Logger");
-        $schedule->command('messages:send-scheduled')->everyMinute();
-        $schedule->command('messages:send-prediction')->everyMinute();
+        $schedule->command('messages:send-scheduled')->daily();
+        $schedule->command('messages:send-prediction')->daily();
     }
 
     /**
