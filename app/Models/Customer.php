@@ -18,6 +18,7 @@ class Customer extends Model
         'phone',
         'email',
         'conversation_stage',
+        'extractedDate',
         'stopChat',
         'completed_onboarding',
         'location',
