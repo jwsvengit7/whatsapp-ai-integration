@@ -365,7 +365,7 @@ class WhatsappService
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                         $pattern = '/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}\b/';
                         preg_match_all($pattern, $aiMessage, $matches); // Use preg_match_all to get all matches
-                        $dates = $matches[0]; // $matches[0] now holds an array of all matched dates
+                        $dates = $matches[0];
 
                         if (!empty($dates)) {
                             Log::info("Extracted dates: " . implode(", ", $dates)); // Log all dates as a comma-separated string
