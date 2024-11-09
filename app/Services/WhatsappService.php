@@ -328,12 +328,7 @@ class WhatsappService
                             ]);
                         } else {
                             $this->sendMessage($customer->phone, "No questions for this product.", $customer->id, []);
-                            $customer->update([
-                                'conversation_stage' => 6,
-                                'questions_json' => null,
-                                'current_question_index' => null,
-                                'message_json' => null,
-                            ]);
+
                         }
                         break;
 
@@ -369,10 +364,10 @@ class WhatsappService
                         $aiMessage = $this->generateAIResponse($conversation_data);
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                         $pattern = '/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}\b/';
-                        $matches = [];
                         preg_match($pattern, $aiMessage, $matches);
                         $extractedDate = $matches[0];
                         $dates = json_decode($extractedDate);
+                        Log::info("dates ************** to {$dates}");
                         $imageGenerator = new ImageGenerator();
                         $filePath = $imageGenerator->createCalendarImage(date("Y"), date("m")); // Example with current year/month
                         $imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVn4qoj8adn2HTeVgwTJdsgofOtjqY8yKBjQ&s";
@@ -380,22 +375,15 @@ class WhatsappService
                         $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $imageUrl);
 
                         $customer->update([
-                            'conversation_stage' => 5,
+                            'conversation_stage' => 0,
                             'extractedDate'=>$dates,
+                            'completed_onboarding' => true,
                             'questions_json' => null,
                             'current_question_index' => null,
-                            'message_json' => $conversation_data,
-                        ]);
-                        break;
-
-                    case 5:
-
-                        $customer->update([
-                            'completed_onboarding' => true,
-                            'conversation_stage' => 0,
                             'message_json' => null,
                         ]);
                         break;
+
 
                     default:
                         $this->sendMessage($customer->phone, "I'm here to help! Type 'schedule' to set a message or 'chat' to talk with AI.", $customer->id, []);
@@ -489,7 +477,7 @@ class WhatsappService
         foreach ($scheduledMessages as $scheduledMessage) {
             foreach ($customers as $customer) {
 
-                if ($customer) {
+                if ($customer->completed_onboarding) {
                     Log::info("Incomming message to {$customer->phone}");
                     $this->sendMessage($customer->phone, $scheduledMessage->message_content, $customer->id, []);
                     Log::info("Message sent to {$customer->phone}");
