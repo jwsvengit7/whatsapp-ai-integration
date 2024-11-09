@@ -376,7 +376,7 @@ class WhatsappService
                         $filePath = $imageGenerator->createCalendarImage(date("Y"), date("m")); // Example with current year/month
                         $imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVn4qoj8adn2HTeVgwTJdsgofOtjqY8yKBjQ&s";
 
-                        $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $imageUrl);
+//                        $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $imageUrl);
 
                         $customer->update([
                             'conversation_stage' => 0,
@@ -495,9 +495,36 @@ class WhatsappService
         return "Cron has run";
     }
 
-    public function cron_job_prediction():string
+    /**
+     * @throws ConnectionException
+     */
+    public function cron_job_prediction(): string
     {
-        return "";
+        $customers = Customer::all();
+        $today = date("F j, Y");
+
+        foreach ($customers as $customer) {
+            $datesJson = $customer->extractedDate;
+            $dates = json_decode($datesJson, true);
+
+            if ($dates) {
+                foreach ($dates as $date) {
+                    if ($date === $today) {
+                        if ($customer->completed_onboarding) {
+                            Log::info("Sending message to {$customer->phone}");
+                            $this->sendMessage($customer->phone, "Your next refill is expected today!", $customer->id, []);
+
+                            Log::info("Message sent to {$customer->phone}");
+                        }
+                    }
+                }
+            } else {
+                Log::info("No extracted dates for customer {$customer->id}");
+            }
+        }
+
+        return "Cron job completed";
     }
+
 
 }
