@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
     {
         Log::info("Logger");
         $schedule->command('messages:send-scheduled')->everyMinute();
+        $schedule->command('messages:send-prediction')->everyMinute();
     }
 
     /**
@@ -26,5 +27,6 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\SendScheduledMessages::class,
+        \App\Console\Commands\Prediction::class,
     ];
 }

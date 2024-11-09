@@ -497,4 +497,8 @@ class WhatsappService
         return "Cron has run";
     }
 
+    public function cron_job_prediction():void
+    {
+    }
+
 }
