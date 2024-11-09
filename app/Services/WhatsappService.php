@@ -482,11 +482,11 @@ class WhatsappService
 
         foreach ($scheduledMessages as $scheduledMessage) {
             foreach ($customers as $customer) {
-                Log::info("Message sent to {$customer->phone}");
-                if ($customer) {
-                    $this->sendMessage($customer->phone, $scheduledMessage->message_content, $customer->id, []);
 
-                    // Update message status to 'sent'
+                if ($customer) {
+                    Log::info("Incomming message to {$customer->phone}");
+                    $this->sendMessage($customer->phone, $scheduledMessage->message_content, $customer->id, []);
+                    Log::info("Message sent to {$customer->phone}");
                     $scheduledMessage->status = 'sent';
                     $scheduledMessage->save();
 

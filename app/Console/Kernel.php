@@ -11,19 +11,17 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      *
-
+     * @param Schedule $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule): void
     {
         Log::info("Logger");
         $schedule->command('messages:send-scheduled')->everyMinute();
-        $schedule->command('messages:send-scheduled')->everyMinute();
     }
 
     /**
      * The Artisan commands provided by your application.
-     *
      * @var array
      */
     protected $commands = [
