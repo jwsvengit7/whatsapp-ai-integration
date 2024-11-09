@@ -517,12 +517,36 @@ class WhatsappService
                             Log::info("Sending message to {$customer->phone}");
                             $this->sendMessage($customer->phone, "Your next refill is expected today!", $customer->id, []);
                             foreach($users as $user){
-                                if($user->role==UserRole::VENDOR){
-                                    $message = "Here is the closet vendor for your product if you still need any of our service \nName: ".$user->name."\nAddress: ".$user->addrerss."\nPhone: ".$user->phone;
-                                    Log::info("Message {$message}");
-                                    $this->sendMessage($customer->phone, $message, $customer->id, []);
+                                if ($user->role == UserRole::VENDOR) {
+                                    $location = $user->address;
+                                    $normalizedLocation = $this->normalizeAddress($location);
+                                    $normalizedCustomerAddress = $this->normalizeAddress($customer->location);
 
+                                    $locationWords = preg_split('/\s+/', $normalizedLocation);
+                                    $customerWords = preg_split('/\s+/', $normalizedCustomerAddress);
+                                    $similarWords = [];
+
+                                    foreach ($locationWords as $locationWord) {
+                                        foreach ($customerWords as $customerWord) {
+                                            $distance = levenshtein($locationWord, $customerWord);
+                                            if ($distance <= 2) {
+                                                $similarWords[] = [
+                                                    'locationWord' => $locationWord,
+                                                    'customerWord' => $customerWord,
+                                                    'distance' => $distance
+                                                ];
+                                            }
+                                        }
+                                    }
+
+                                    if (!empty($similarWords)) {
+                                        $message = "Here is the closest vendor for your product if you still need any of our service \nName: " . $user->name . "\nAddress: " . $user->address . "\nPhone: " . $user->phone;
+                                        Log::info("Message: {$message}");
+
+                                        $this->sendMessage($customer->phone, $message, $customer->id, []);
+                                    }
                                 }
+
                             }
                             Log::info("Message sent to {$customer->phone}");
                         }
@@ -534,6 +558,11 @@ class WhatsappService
         }
 
         return "Cron job completed";
+    }
+
+
+  public  function normalizeAddress($address):string {
+        return strtolower(preg_replace('/[^a-z0-9\s]/', '', $address));
     }
 
 
