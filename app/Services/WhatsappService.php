@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\UserRole;
 use App\Helpers\AIHelpers;
 use App\Helpers\CustomerUtils;
 use App\Helpers\HttpUtils;
@@ -501,11 +502,13 @@ class WhatsappService
     public function cron_job_prediction(): string
     {
         $customers = Customer::all();
+        $users = User::all();
         $today = date("F j, Y");
 
         foreach ($customers as $customer) {
             $datesJson = $customer->extractedDate;
             $dates = json_decode($datesJson, true);
+
 
             if ($dates) {
                 foreach ($dates as $date) {
@@ -513,7 +516,14 @@ class WhatsappService
                         if ($customer->completed_onboarding) {
                             Log::info("Sending message to {$customer->phone}");
                             $this->sendMessage($customer->phone, "Your next refill is expected today!", $customer->id, []);
+                            foreach($users as $user){
+                                if($user->role==UserRole::VENDOR){
+                                    $message = "Here is the closet vendor for your product if you still need any of our service \nName: ".$user->name."\nAddress: ".$user->addrerss."\nPhone: ".$user->phone;
+                                    Log::info("Message {$message}");
+                                    $this->sendMessage($customer->phone, $message, $customer->id, []);
 
+                                }
+                            }
                             Log::info("Message sent to {$customer->phone}");
                         }
                     }
