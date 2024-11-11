@@ -374,11 +374,12 @@ class WhatsappService
                             Log::info("No dates found in AI message.");
                         }
 
-                        $month = Date("M");
+                        $month = Date("m");
                         $year=Date("Y");
                         Log::info(" dates*** ".$month);
                         Log::info(" dates .".$year);
                         $APIUrl = "https://halimaxcraft.ng/ai/?month=".$month."&year=".$year."&text=".$customer->extractedDate;
+                        Log::info(" APIUrl .".$APIUrl);
                         $response = Http::withHeaders([
                             'Content-Type' => 'application/json',
                         ])->get($APIUrl);
