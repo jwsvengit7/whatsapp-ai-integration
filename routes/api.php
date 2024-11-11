@@ -20,9 +20,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     // Customer Endpoints
     Route::post('/create', [CustomerController::class, 'createCustomer']);
     Route::get('/fetch/{id}', [CustomerController::class, 'fetchCustomer']);
-
     Route::get('/all-customer', [CustomerController::class, 'fetchAllCustomer']);
-
     // User Endpoints
     Route::post('/create-user', [UserController::class, 'createAccount']);
     Route::get('/fetch-user', [UserController::class, 'fetchUser']);

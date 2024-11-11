@@ -365,20 +365,29 @@ class WhatsappService
                         $aiMessage = $this->generateAIResponse($conversation_data);
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                         $pattern = '/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}\b/';
-                        preg_match_all($pattern, $aiMessage, $matches); // Use preg_match_all to get all matches
+                        preg_match_all($pattern, $aiMessage, $matches);
                         $dates = $matches[0];
 
                         if (!empty($dates)) {
-                            Log::info("Extracted dates: " . implode(", ", $dates)); // Log all dates as a comma-separated string
+                            Log::info("Extracted dates: " . implode(", ", $dates));
                         } else {
                             Log::info("No dates found in AI message.");
                         }
-                        $imageGenerator = new ImageGenerator();
-                        $filePath = $imageGenerator->createCalendarImage(date("Y"), date("m")); // Example with current year/month
-                        $imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVn4qoj8adn2HTeVgwTJdsgofOtjqY8yKBjQ&s";
 
-//                        $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $imageUrl);
+                        $month = Date("M");
+                        $year=Date("Y");
+                        Log::info(" dates*** ".$month);
+                        Log::info(" dates .".$year);
+                        $APIUrl = "https://halimaxcraft.ng/ai/?month=".$month."&year=".$year."&text=".$customer->extractedDate;
+                        $response = Http::withHeaders([
+                            'Content-Type' => 'application/json',
+                        ])->get($APIUrl);
 
+                        if ($response->successful()) {
+                            $responseBody = $response->json();
+                            $url = $responseBody['url'];
+                            $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $url);
+                        }
                         $customer->update([
                             'conversation_stage' => 0,
                             'extractedDate'=>$dates,
@@ -564,6 +573,5 @@ class WhatsappService
   public  function normalizeAddress($address):string {
         return strtolower(preg_replace('/[^a-z0-9\s]/', '', $address));
     }
-
 
 }
