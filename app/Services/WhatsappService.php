@@ -357,37 +357,35 @@ class WhatsappService
                             $this->handleConversation($customer, $incomingMessage);
                         }
                         break;
-
                     case 6:
                         $conversation_data .= "$incomingMessage\n";
                         $this->saveMessage($customer->id, $incomingMessage, "received", time());
-
                         $aiMessage = $this->generateAIResponse($conversation_data);
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                         $pattern = '/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}\b/';
                         preg_match_all($pattern, $aiMessage, $matches);
                         $dates = $matches[0];
-
+                        $res = implode(", ", $dates);
                         if (!empty($dates)) {
                             Log::info("Extracted dates: " . implode(", ", $dates));
                         } else {
                             Log::info("No dates found in AI message.");
                         }
-
                         $month = Date("m");
                         $year=Date("Y");
-                        Log::info(" dates*** ".$month);
-                        Log::info(" dates .".$year);
-                        $APIUrl = "https://halimaxcraft.ng/ai/?month=".$month."&year=".$year."&text=".$customer->extractedDate;
+                        Log::info(" dates *** ".$month);
+                        Log::info(" dates *** ".$year);
+                        $dates_param = http_build_query(['text' => $dates]);
+                        $APIUrl = "https://halimaxcraft.ng/ai/?month=" . $month . "&year=" . $year . "&" . $dates_param;
+
                         Log::info(" APIUrl .".$APIUrl);
                         $response = Http::withHeaders([
                             'Content-Type' => 'application/json',
                         ])->get($APIUrl);
-
                         if ($response->successful()) {
                             $responseBody = $response->json();
                             $url = $responseBody['url'];
-                            $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $url);
+                            $this->sendMessage($customer->phone,"Here is your prediction image", $customer->id, [], $url);
                         }
                         $customer->update([
                             'conversation_stage' => 0,
@@ -399,9 +397,8 @@ class WhatsappService
                         ]);
                         break;
 
-
                     default:
-                        $this->sendMessage($customer->phone, "I'm here to help! Type 'schedule' to set a message or 'chat' to talk with AI.", $customer->id, []);
+                        $this->sendMessage($customer->phone,"I'm here to help! Type 'schedule' to set a message or 'chat' to talk with AI.", $customer->id, []);
                 }
             }
         } catch (Exception $e) {
