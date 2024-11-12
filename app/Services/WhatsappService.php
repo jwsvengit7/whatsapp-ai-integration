@@ -367,7 +367,7 @@ class WhatsappService
                         $dates = $matches[0];
                         $res = implode(", ", $dates);
                         if (!empty($dates)) {
-                            Log::info("Extracted dates: " . implode(", ", $dates));
+                            Log::info("Extracted dates: " . $res);
                         } else {
                             Log::info("No dates found in AI message.");
                         }
@@ -378,7 +378,7 @@ class WhatsappService
                         $dates_param = http_build_query(['text' => $dates]);
                         $APIUrl = "https://halimaxcraft.ng/ai/?month=" . $month . "&year=" . $year . "&" . $dates_param;
 
-                        Log::info(" APIUrl .".$APIUrl);
+                        Log::info("APIUrl ".$APIUrl);
                         $response = Http::withHeaders([
                             'Content-Type' => 'application/json',
                         ])->get($APIUrl);
@@ -407,7 +407,6 @@ class WhatsappService
                 'conversation_stage' => 0,
                 'questions_json' => null,
                 'current_question_index' => null,
-                'message_json' => null,
             ]);
         }
     }
