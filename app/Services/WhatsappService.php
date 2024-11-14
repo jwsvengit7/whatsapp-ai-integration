@@ -178,9 +178,9 @@ class WhatsappService
      * @throws Exception
      */
     public function generateAIResponse(string $message): string {
-        $context = AIHelpers::AIContext()."\n
-        This are the questions\n
-        ".$this->displayProductQuestions();
+        $context = AIHelpers::AIContext($this->displayProductQuestions());
+
+
         Log::info('Message: ' . $context);
 
         $url = env("OPENAI_API_URL");
