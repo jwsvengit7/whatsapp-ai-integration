@@ -178,7 +178,9 @@ class WhatsappService
      * @throws Exception
      */
     public function generateAIResponse(string $message): string {
-        $context = AIHelpers::AIContext();
+        $context = AIHelpers::AIContext()."\n
+        This are the questions\n
+        ".$this->displayProductQuestions();;
 
         $url = env("OPENAI_API_URL");
         $apiKey = env('OPENAI_API_KEY');
@@ -271,136 +273,60 @@ class WhatsappService
                     return;
                 }
 
-                switch ($stage) {
-                    case 0:
-                        $this->sendMessage($customer->phone, "Welcome! What is your name?", $customer->id, []);
-                        $customer->update(['conversation_stage' => 1]);
-                        break;
-
-                    case 1:
-                        $conversation_data .= "Name: $incomingMessage\n";
-                        $customer->name = $incomingMessage;
-                        $customer->save();
-                        $this->saveMessage($customer->id, $incomingMessage, "received", time());
-
-                        $this->sendMessage($customer->phone, "Where are you chatting from?", $customer->id, []);
-                        $customer->update(['conversation_stage' => 2, "message_json" => $conversation_data]);
-                        break;
-
-                    case 2:
-                        $conversation_data .= "Location: $incomingMessage\n";
-                        $customer->location = $incomingMessage;
-                        $customer->save();
-                        $products = Product::all();
-                        $buttons = [];
-
-                        foreach ($products as $product) {
-                            $buttons[] = [
-                                'type' => 'reply',
-                                'reply' => [
-                                    'id' => $product->id,
-                                    'title' => $product->name,
-                                ],
-                            ];
-                        }
-                        $this->saveMessage($customer->id, $incomingMessage, "received", time());
-
-                        $this->sendMessage($customer->phone, "What type of stove do you use?", $customer->id, $buttons);
-                        $customer->update(['conversation_stage' => 3, "message_json" => $conversation_data]);
-                        break;
-
-                    case 3:
-                        $productName = Product::where("id", $incomingMessage)->first()->name;
-                        $conversation_data .= "Selected Product Name: $productName\n";
-                        $this->saveMessage($customer->id, $productName, "received", time());
-                        $customer->update(['selected_product_id' => $incomingMessage, "message_json" => $conversation_data]);
-
-                        $questions = $this->loadProductQuestions($incomingMessage);
-
-                        if (!empty($questions)) {
-                            $nextQuestion = $questions[0]['question'];
-                            $this->sendMessage($customer->phone, $nextQuestion, $customer->id, []);
+                           $aiMessage = $this->generateAIResponse($incomingMessage);
+                            $this->sendMessage($customer->phone,$aiMessage , $customer->id, []);
 
                             $customer->update([
                                 'conversation_stage' => 4,
                                 'current_question_index' => 1,
-                                'questions_json' => json_encode($questions),
+                                'questions_json' => $incomingMessage,
                                 "message_json" => $conversation_data,
                             ]);
-                        } else {
-                            $this->sendMessage($customer->phone, "No questions for this product.", $customer->id, []);
 
-                        }
-                        break;
 
-                    case 4:
-                        $questions = json_decode($customer->questions_json, true) ?? [];
-                        $currentQuestionIndex = $customer->current_question_index ?? 0;
 
-                        if ($currentQuestionIndex < count($questions)) {
-                            if ($currentQuestionIndex > 0) {
-                                $question = $questions[$currentQuestionIndex - 1]['question'];
-                                $conversation_data .= "$question: $incomingMessage\n";
-                            }
-                            $this->saveMessage($customer->id, $incomingMessage, "received", time());
 
-                            $nextQuestion = $questions[$currentQuestionIndex]['question'];
-                            $this->sendMessage($customer->phone, $nextQuestion, $customer->id, []);
-
-                            $customer->update([
-                                'conversation_stage' => $stage,
-                                'current_question_index' => $currentQuestionIndex + 1,
-                                'message_json' => $conversation_data,
-                            ]);
-                        } else {
-                            $customer->update(['conversation_stage' => 6]);
-                            $this->handleConversation($customer, $incomingMessage);
-                        }
-                        break;
-                    case 6:
-                        $conversation_data .= "$incomingMessage\n";
-                        $this->saveMessage($customer->id, $incomingMessage, "received", time());
-                        $aiMessage = $this->generateAIResponse($conversation_data);
-                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-                        $pattern = '/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}\b/';
-                        preg_match_all($pattern, $aiMessage, $matches);
-                        $dates = $matches[0];
-                        $res = implode(", ", $dates);
-                        if (!empty($dates)) {
-                            Log::info("Extracted dates: " . $res);
-                        } else {
-                            Log::info("No dates found in AI message.");
-                        }
-                        $month = Date("m");
-                        $year=Date("Y");
-                        Log::info(" dates *** ".$month);
-                        Log::info(" dates *** ".$year);
-                        $dates_param = http_build_query(['text' => $dates]);
-                        $APIUrl = "https://halimaxcraft.ng/ai/?month=" . $month . "&year=" . $year . "&" . $dates_param;
-
-                        Log::info("APIUrl ".$APIUrl);
-                        $response = Http::withHeaders([
-                            'Content-Type' => 'application/json',
-                        ])->get($APIUrl);
-                        if ($response->successful()) {
-                            $responseBody = $response->json();
-                            $url = $responseBody['url'];
-                            $this->sendMessage($customer->phone,"Here is your prediction image", $customer->id, [], $url);
-                        }
-                        $customer->update([
-                            'conversation_stage' => 0,
-                            'extractedDate'=>$dates,
-                            'completed_onboarding' => true,
-                            'questions_json' => null,
-                            'current_question_index' => null,
-                            'message_json' => null,
-                        ]);
-                        break;
-
-                    default:
-                        $this->sendMessage($customer->phone,"I'm here to help! Type 'schedule' to set a message or 'chat' to talk with AI.", $customer->id, []);
-                }
-            }
+//                  else{
+//                    $conversation_data .= "$incomingMessage\n";
+//                    $this->saveMessage($customer->id, $incomingMessage, "received", time());
+//                    $aiMessage = $this->generateAIResponse($conversation_data);
+//                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+//                    $pattern = '/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}\b/';
+//                    preg_match_all($pattern, $aiMessage, $matches);
+//                    $dates = $matches[0];
+//                    $res = implode(", ", $dates);
+//                    if (!empty($dates)) {
+//                        Log::info("Extracted dates: " . $res);
+//                    } else {
+//                        Log::info("No dates found in AI message.");
+//                    }
+//                    $month = Date("m");
+//                    $year = Date("Y");
+//                    Log::info(" dates *** " . $month);
+//                    Log::info(" dates *** " . $year);
+//                    $dates_param = http_build_query(['text' => $dates]);
+//                    $APIUrl = "https://halimaxcraft.ng/ai/?month=" . $month . "&year=" . $year . "&" . $dates_param;
+//
+//                    Log::info("APIUrl " . $APIUrl);
+//                    $response = Http::withHeaders([
+//                        'Content-Type' => 'application/json',
+//                    ])->get($APIUrl);
+//                    if ($response->successful()) {
+//                        $responseBody = $response->json();
+//                        $url = $responseBody['url'];
+//                        $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $url);
+//                    }
+//                    $customer->update([
+//                        'conversation_stage' => 0,
+//                        'extractedDate' => $dates,
+//                        'completed_onboarding' => true,
+//                        'questions_json' => null,
+//                        'current_question_index' => null,
+//                        'message_json' => null,
+//                    ]);
+//                }
+//
+      }
         } catch (Exception $e) {
             Log::error('Error handling conversation: ' . $e->getMessage());
             $customer->update([
@@ -411,15 +337,39 @@ class WhatsappService
         }
     }
 
-    protected function loadProductQuestions($productId): array {
+    protected function displayProductQuestions(): string
+    {
+        $products = Product::with('questions')->get();
 
-        $product = Product::where('id', $productId)->first();
+        $output = '';
 
-        if (!$product) {
-            return [];
+        foreach ($products as $product) {
+            // Product name
+            $output .= $product->name . "\n\n";
+
+            // Questions with roman numeral formatting
+            foreach ($product->questions as $index => $question) {
+                $romanIndex = $this->toRomanNumerals($index + 1);
+                $output .= "{$romanIndex} {$question->question}\n";
+            }
+
+            $output .= "\n"; // Line break after each product
         }
-        return ProductQuestion::where('product_id', $product->id)->get()->toArray();
+
+        return $output;
     }
+
+// Helper function to convert numbers to Roman numerals
+    protected function toRomanNumerals(int $number): string
+    {
+        $map = [
+            'I', 'II', 'III', 'IV', 'V',
+            'VI', 'VII', 'VIII', 'IX', 'X'
+        ];
+
+        return $map[$number - 1] ?? (string)$number;
+    }
+
 
     /**
      * @throws ConnectionException
