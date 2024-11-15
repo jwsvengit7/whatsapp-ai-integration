@@ -286,7 +286,8 @@ class WhatsappService
                 "message_json" => $conversation_data,]);
                 break;
                     case 2:
-                        $aiMessage= $this->generateAIResponse($incomingMessage);
+                        $data ="Conversation: ".$conversation_data. "\nContext".$incomingMessage;
+                        $aiMessage= $this->generateAIResponse($data);
 
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
@@ -365,7 +366,7 @@ class WhatsappService
                 $output .= "{$romanIndex} {$question->question}\n";
             }
 
-            $output .= "\n"; // Line break after each product
+            $output .= "\n";
         }
 
         return $output;
