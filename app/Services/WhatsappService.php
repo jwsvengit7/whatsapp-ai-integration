@@ -273,18 +273,29 @@ class WhatsappService
                     $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                     return;
                 }
-
-                           $aiMessage = $this->generateAIResponse($incomingMessage);
-                            $this->sendMessage($customer->phone,$aiMessage , $customer->id, []);
-
-                            $customer->update([
-                                'conversation_stage' => 4,
-                                'current_question_index' => 1,
-                                'questions_json' => $incomingMessage,
-                                "message_json" => $conversation_data,
-                            ]);
+                switch($stage) {
+                    case 1:
 
 
+                        $aiMessage= $this->generateAIResponse($context = AIHelpers::AIContext($this->displayProductQuestions()));
+                $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                $customer->update(['conversation_stage' => 2,
+                'current_question_index' => 1,
+                'questions_json' => $incomingMessage,
+                "message_json" => $conversation_data,]);
+                break;
+                    case 2:
+                        $aiMessage= $this->generateAIResponse($incomingMessage);
+
+                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                        $customer->update(['conversation_stage' => 2,
+                            'current_question_index' => 2,
+                            'questions_json' => $incomingMessage,
+                            "message_json" => $conversation_data,]);
+                        break;
+                }
 
 
 //                  else{
