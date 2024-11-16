@@ -256,7 +256,6 @@ class WhatsappService
      * @throws Exception
      */
     /**
-     * @throws ConnectionException
      * @throws Exception
      */
     protected function handleConversation(Customer $customer, string $incomingMessage): void {
@@ -273,21 +272,13 @@ class WhatsappService
                     $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                     return;
                 }
-                switch($stage) {
+                switch($stage){
                     case 1:
 
 
-                        $aiMessage= $this->generateAIResponse($context = AIHelpers::AIContext($this->displayProductQuestions()));
-                $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-                $customer->update(['conversation_stage' => 2,
-                'current_question_index' => 1,
-                'questions_json' => $incomingMessage,
-                "message_json" => $conversation_data,]);
-                break;
-                    case 2:
-                        $data ="Conversation: ".$conversation_data. "\nContext".$incomingMessage;
-                        $aiMessage= $this->generateAIResponse($data);
+                        $data ="\n\n\n\n".$incomingMessage;
+                        $context = AIHelpers::AIContext($this->displayProductQuestions()).$data;
+                        $aiMessage= $this->generateAIResponse($context);
 
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
@@ -296,7 +287,15 @@ class WhatsappService
                             'questions_json' => $incomingMessage,
                             "message_json" => $conversation_data,]);
                         break;
-                }
+                    case 2:
+
+                        $aiMessage= $this->generateAIResponse($incomingMessage);
+
+                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+                        break;
+
+
+
 
 
 //                  else{
@@ -337,7 +336,7 @@ class WhatsappService
 //                        'current_question_index' => null,
 //                        'message_json' => null,
 //                    ]);
-//                }
+             }
 //
       }
         } catch (Exception $e) {
