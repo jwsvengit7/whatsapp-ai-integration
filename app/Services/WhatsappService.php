@@ -273,7 +273,7 @@ class WhatsappService
                     return;
                 }
                 switch($stage){
-                    case 1:
+                    case 0:
 
 
                         $data ="\n\n\n\n".$incomingMessage;
@@ -282,12 +282,12 @@ class WhatsappService
 
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
-                        $customer->update(['conversation_stage' => 2,
+                        $customer->update(['conversation_stage' => 1,
                             'current_question_index' => 2,
                             'questions_json' => $incomingMessage,
                             "message_json" => $conversation_data,]);
                         break;
-                    case 2:
+                    case 1:
 
                         $aiMessage= $this->generateAIResponse($incomingMessage);
 
