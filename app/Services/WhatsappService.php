@@ -289,7 +289,9 @@ class WhatsappService
                         break;
                     case 1:
 
-                        $aiMessage= $this->generateAIResponse($incomingMessage);
+                        $data ="\n\n\n\n".$incomingMessage;
+                        $context = AIHelpers::AIContext($this->displayProductQuestions()).$data;
+                        $aiMessage= $this->generateAIResponse($context);
 
                         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                         break;
