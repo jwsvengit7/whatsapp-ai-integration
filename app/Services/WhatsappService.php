@@ -280,7 +280,7 @@ class WhatsappService
             $products = DB::table('products')->pluck('name')->toArray();
 
             $messageLower = strtolower($incomingMessage);
-            if (str_contains($messageLower, 'select') && str_contains($messageLower, 'product')) {
+            if (str_contains($messageLower, 'select') && str_contains($messageLower, 'products')) {
                 $selectedProduct = null;
 
                 foreach ($products as $product) {
