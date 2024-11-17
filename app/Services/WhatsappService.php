@@ -262,6 +262,7 @@ class WhatsappService
 
     protected function handleConversation(Customer $customer, string $incomingMessage): void
     {
+        $this->handleNameInput($customer,$incomingMessage);
 
         try {
             $stage = $customer->conversation_stage ?? 0;
@@ -277,7 +278,11 @@ class WhatsappService
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
-            $products = Product::all();
+
+            $products = Product::with('questions')->get();
+            $dataProduct = [];
+
+
             Log::info('product: ' . $products);
             $messageLower = strtolower($incomingMessage);
             if (str_contains($messageLower, 'select') && str_contains($messageLower, 'products')) {
@@ -290,6 +295,7 @@ class WhatsappService
                         Log::info('selectedProduct: ' . $selectedProduct);
                         break;
                     }
+                    $dataProduct[]=$product;
                 }
 
                 if ($selectedProduct) {
@@ -299,7 +305,7 @@ class WhatsappService
                         AIHelpers::AIContext($this->displayProductQuestions())
                     );
 
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, $products);
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, $dataProduct);
                     $customer->update([
                         'conversation_stage' => $stage + 1,
                         'message_json' => $conversation_data,
@@ -308,77 +314,56 @@ class WhatsappService
                 }
 
             }
-                    switch ($stage) {
-                        case 0:
+
                             $data = "\n\n" . $incomingMessage;
                             $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $data);
 
                             $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
                             $customer->update([
-                                'conversation_stage' => 1,
-                                'current_question_index' => 2,
+                                'conversation_stage' => $customer->conversation_stage+1,
+                                'current_question_index' => $customer->current_question_index+1,
                                 'questions_json' => $incomingMessage,
                                 "message_json" => $conversation_data,
                             ]);
-                            break;
 
-                        case 1:
-                            $data = "\n\n" . $incomingMessage;
-                            $conversation_data .= $data;
-                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
 
-                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
-                            $customer->update([
-                                'conversation_stage' => 2,
-                                'message_json' => $conversation_data,
-                            ]);
-                            break;
-                        case 2:
-                            $data = "\n\n" . $incomingMessage;
-                            $conversation_data .= $data;
-                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
-
-                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-                            $customer->update([
-                                'conversation_stage' => 3,
-                                'message_json' => $conversation_data,
-                            ]);
-                            break;
-
-                        case 3:
-                            $data = "\n\n" . $incomingMessage;
-                            $conversation_data .= $data;
-                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
-
-                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-                            $customer->update([
-                                'conversation_stage' => 4,
-                                'message_json' => $conversation_data,
-                            ]);
-                            break;
-
-                        default:
-                            $data = "\n\n" . $incomingMessage;
-                            $conversation_data .= $data;
-                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
-
-                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-                            $customer->update([
-                                'conversation_stage' => $customer->conversation_stage++,
-                                'message_json' => $conversation_data,
-                            ]);
-                            break;
-                    }
                 }
             catch
                 (Exception $e) {
                     Log::error('Error handling conversation: ' . $e->getMessage());
 
                 }
+    }
+
+    protected function handleNameInput(Customer $customer, string $incomingMessage): void
+    {
+        $message = strtolower(trim($incomingMessage));
+        $patterns = [
+            '/my name is (\w+)/i',
+            '/i am (\w+)/i',
+            '/it\'s (\w+)/i',
+        ];
+
+        $extractedName = null;
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $message, $matches)) {
+                $extractedName = $matches[1];
+                break;
+            }
+        }
+
+        if (!$extractedName) {
+            $extractedName = $incomingMessage;
+        }
+        $isValidName = preg_match('/^[a-zA-Z\s]{2,50}$/', $extractedName);
+
+        if ($isValidName) {
+
+            $customer->update(['name' => ucfirst($extractedName)]);
+
+        }
     }
 
 
