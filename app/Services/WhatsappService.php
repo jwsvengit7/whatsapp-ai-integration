@@ -310,7 +310,18 @@ class WhatsappService
                     break;
 
                 default: // Fallback for unexpected stages
-                    Log::warning("Unexpected conversation stage: $stage for customer ID: {$customer->id}");
+                    $data = "\n\n" . $incomingMessage;
+                    $conversation_data .= $data; // Append to the conversation data
+                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                    // After capturing location, complete onboarding and reset the stage
+                    $customer->update([
+                        'conversation_stage' => 0, // Reset stage for next conversation
+                        'completed_onboarding' => true, // Mark onboarding as complete
+                        'message_json' => $conversation_data,
+                    ])
                     break;
             }
         } catch (Exception $e) {
