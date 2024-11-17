@@ -280,14 +280,16 @@ class WhatsappService
             }
             $products = Product::all();
             Log::info('product: ' . $products);
+            $productData=[];
             $messageLower = strtolower($incomingMessage);
             if (str_contains($messageLower, 'select') && str_contains($messageLower, 'products')) {
                 $selectedProduct = null;
                 Log::info('messageLower: ' . $messageLower);
 
-                foreach ($products as $product) {
-                    if (str_contains($messageLower, strtolower($product))) {
-                        $selectedProduct = $product;
+                for($i=0;$i<count($products);$i++) {
+                    $productData[$i]=$products[$i]->name;
+                    if (str_contains($messageLower, strtolower($products[$i]->name))) {
+                        $selectedProduct = $products[$i]->name;
                         Log::info('selectedProduct: ' . $selectedProduct);
                         break;
                     }
@@ -300,7 +302,7 @@ class WhatsappService
                         AIHelpers::AIContext($this->displayProductQuestions())
                     );
 
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, $products);
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, $productData);
                     $customer->update([
                         'conversation_stage' => $stage + 1,
                         'message_json' => $conversation_data,
