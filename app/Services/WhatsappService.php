@@ -304,7 +304,6 @@ class WhatsappService
                     // After capturing location, complete onboarding and reset the stage
                     $customer->update([
                         'conversation_stage' => 0, // Reset stage for next conversation
-                        'completed_onboarding' => true, // Mark onboarding as complete
                         'message_json' => $conversation_data,
                     ]);
                     break;
@@ -318,19 +317,14 @@ class WhatsappService
 
                     // After capturing location, complete onboarding and reset the stage
                     $customer->update([
-                        'conversation_stage' => 0, // Reset stage for next conversation
-                        'completed_onboarding' => true, // Mark onboarding as complete
+                        'conversation_stage' => 0,
                         'message_json' => $conversation_data,
                     ]);
                     break;
             }
         } catch (Exception $e) {
             Log::error('Error handling conversation: ' . $e->getMessage());
-            $customer->update([
-                'conversation_stage' => 0, // Reset stage in case of failure
-                'questions_json' => null,
-                'current_question_index' => null,
-            ]);
+
         }
     }
 
