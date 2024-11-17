@@ -303,12 +303,11 @@ class WhatsappService
 
                     // After capturing location, complete onboarding and reset the stage
                     $customer->update([
-                        'conversation_stage' => 0, // Reset stage for next conversation
+                        'conversation_stage' => 2, // Reset stage for next conversation
                         'message_json' => $conversation_data,
                     ]);
                     break;
-
-                default: // Fallback for unexpected stages
+                case 2: // Asking for location
                     $data = "\n\n" . $incomingMessage;
                     $conversation_data .= $data; // Append to the conversation data
                     $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
@@ -317,7 +316,33 @@ class WhatsappService
 
                     // After capturing location, complete onboarding and reset the stage
                     $customer->update([
-                        'conversation_stage' => 0,
+                        'conversation_stage' => 3, // Reset stage for next conversation
+                        'message_json' => $conversation_data,
+                    ]);
+                    break;
+
+                case 3: // Asking for location
+                    $data = "\n\n" . $incomingMessage;
+                    $conversation_data .= $data; // Append to the conversation data
+                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                    $customer->update([
+                        'conversation_stage' => 4,
+                        'message_json' => $conversation_data,
+                    ]);
+                    break;
+
+                default:
+                    $data = "\n\n" . $incomingMessage;
+                    $conversation_data .= $data; // Append to the conversation data
+                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                    $customer->update([
+                        'conversation_stage' => $customer->conversation_stage++,
                         'message_json' => $conversation_data,
                     ]);
                     break;
