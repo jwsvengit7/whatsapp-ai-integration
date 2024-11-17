@@ -277,15 +277,17 @@ class WhatsappService
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
-            $products = DB::table('products')->pluck('name')->toArray();
-
+            $products = Product::all();
+            Log::info('product: ' . $products);
             $messageLower = strtolower($incomingMessage);
             if (str_contains($messageLower, 'select') && str_contains($messageLower, 'products')) {
                 $selectedProduct = null;
+                Log::info('messageLower: ' . $messageLower);
 
                 foreach ($products as $product) {
                     if (str_contains($messageLower, strtolower($product))) {
                         $selectedProduct = $product;
+                        Log::info('selectedProduct: ' . $selectedProduct);
                         break;
                     }
                 }
@@ -304,6 +306,7 @@ class WhatsappService
                     ]);
                     return;
                 }
+
             }
                     switch ($stage) {
                         case 0:
