@@ -41,7 +41,11 @@ Key Instructions for Predictions:
 
 Thank you for helping customers manage their fuel needs with precision and care.
 
-When is time for prediction the format should e like this
+When is time for to show the list of product we have the format should be like this
+Here is the available Products we have
+in number format
+
+When is time for prediction the format should be like this
 
 Hey Name!
 
