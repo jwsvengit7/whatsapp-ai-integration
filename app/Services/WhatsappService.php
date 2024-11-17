@@ -284,7 +284,7 @@ class WhatsappService
             $productData = [];
             $messageLower = strtolower(trim($incomingMessage)); // Convert incoming message to lowercase and trim whitespace
 
-            if (str_contains($messageLower, 'Here is the available Products we have')) {
+            if (str_contains($messageLower, 'Here are the available products we have')) {
                 $selectedProduct = null;
                 foreach ($products as $product) {
                     $productData[] = $product->name;
