@@ -22,6 +22,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
@@ -261,97 +262,123 @@ class WhatsappService
 
     protected function handleConversation(Customer $customer, string $incomingMessage): void
     {
+
         try {
             $stage = $customer->conversation_stage ?? 0;
             $conversation_data = $customer->message_json ?? "";
 
             if ($customer->stopChat) {
-                return; // If the customer has opted out, stop further processing.
+                return;
             }
 
-            // If onboarding is complete, skip initial questions and proceed to chat
             if ($customer->completed_onboarding) {
                 $this->saveMessage($customer->id, $incomingMessage, "received", time());
                 $aiMessage = $this->generateAIResponse($incomingMessage);
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
+            $products = DB::table('products')->pluck('name')->toArray();
 
-            // Handle onboarding flow based on the conversation stage
-            switch ($stage) {
-                case 0: // Asking for name
-                    $data = "\n\n" . $incomingMessage; // Add user input to conversation data
-                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $data);
+            $messageLower = strtolower($incomingMessage);
+            if (str_contains($messageLower, 'Select')) {
+                $selectedProduct = null;
 
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+                foreach ($products as $product) {
+                    if (str_contains($messageLower, strtolower($product))) {
+                        $selectedProduct = $product;
+                        break;
+                    }
+                }
 
-                    // Update to next stage and save user input
+                if ($selectedProduct) {
+                    $conversation_data .= "\nSelected Product: " . $selectedProduct;
+
+                    $aiMessage = $this->generateAIResponse(
+                        AIHelpers::AIContext($this->displayProductQuestions())
+                    );
+
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, $products);
                     $customer->update([
-                        'conversation_stage' => 1,
-                        'current_question_index' => 2,
-                        'questions_json' => $incomingMessage,
-                        "message_json" => $conversation_data,
-                    ]);
-                    break;
-
-                case 1: // Asking for location
-                    $data = "\n\n" . $incomingMessage;
-                    $conversation_data .= $data; // Append to the conversation data
-                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
-
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-                    // After capturing location, complete onboarding and reset the stage
-                    $customer->update([
-                        'conversation_stage' => 2, // Reset stage for next conversation
+                        'conversation_stage' => $stage + 1,
                         'message_json' => $conversation_data,
                     ]);
-                    break;
-                case 2: // Asking for location
-                    $data = "\n\n" . $incomingMessage;
-                    $conversation_data .= $data; // Append to the conversation data
-                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
-
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-                    // After capturing location, complete onboarding and reset the stage
-                    $customer->update([
-                        'conversation_stage' => 3, // Reset stage for next conversation
-                        'message_json' => $conversation_data,
-                    ]);
-                    break;
-
-                case 3: // Asking for location
-                    $data = "\n\n" . $incomingMessage;
-                    $conversation_data .= $data; // Append to the conversation data
-                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
-
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-                    $customer->update([
-                        'conversation_stage' => 4,
-                        'message_json' => $conversation_data,
-                    ]);
-                    break;
-
-                default:
-                    $data = "\n\n" . $incomingMessage;
-                    $conversation_data .= $data; // Append to the conversation data
-                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
-
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-                    $customer->update([
-                        'conversation_stage' => $customer->conversation_stage++,
-                        'message_json' => $conversation_data,
-                    ]);
-                    break;
+                    return;
+                }
             }
-        } catch (Exception $e) {
-            Log::error('Error handling conversation: ' . $e->getMessage());
+                    switch ($stage) {
+                        case 0:
+                            $data = "\n\n" . $incomingMessage;
+                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $data);
 
-        }
+                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                            $customer->update([
+                                'conversation_stage' => 1,
+                                'current_question_index' => 2,
+                                'questions_json' => $incomingMessage,
+                                "message_json" => $conversation_data,
+                            ]);
+                            break;
+
+                        case 1:
+                            $data = "\n\n" . $incomingMessage;
+                            $conversation_data .= $data;
+                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+
+                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                            $customer->update([
+                                'conversation_stage' => 2,
+                                'message_json' => $conversation_data,
+                            ]);
+                            break;
+                        case 2:
+                            $data = "\n\n" . $incomingMessage;
+                            $conversation_data .= $data;
+                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+
+                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+                            $customer->update([
+                                'conversation_stage' => 3,
+                                'message_json' => $conversation_data,
+                            ]);
+                            break;
+
+                        case 3:
+                            $data = "\n\n" . $incomingMessage;
+                            $conversation_data .= $data;
+                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+
+                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                            $customer->update([
+                                'conversation_stage' => 4,
+                                'message_json' => $conversation_data,
+                            ]);
+                            break;
+
+                        default:
+                            $data = "\n\n" . $incomingMessage;
+                            $conversation_data .= $data;
+                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+
+                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+
+                            $customer->update([
+                                'conversation_stage' => $customer->conversation_stage++,
+                                'message_json' => $conversation_data,
+                            ]);
+                            break;
+                    }
+                }
+            catch
+                (Exception $e) {
+                    Log::error('Error handling conversation: ' . $e->getMessage());
+
+                }
     }
+
+
 
 //    protected function handleConversation(Customer $customer, string $incomingMessage): void {
 //        try {
