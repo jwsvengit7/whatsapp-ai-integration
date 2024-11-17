@@ -258,98 +258,163 @@ class WhatsappService
     /**
      * @throws Exception
      */
-    protected function handleConversation(Customer $customer, string $incomingMessage): void {
+
+    protected function handleConversation(Customer $customer, string $incomingMessage): void
+    {
         try {
             $stage = $customer->conversation_stage ?? 0;
             $conversation_data = $customer->message_json ?? "";
 
             if ($customer->stopChat) {
+                return; // If the customer has opted out, stop further processing.
+            }
+
+            // If onboarding is complete, skip initial questions and proceed to chat
+            if ($customer->completed_onboarding) {
+                $this->saveMessage($customer->id, $incomingMessage, "received", time());
+                $aiMessage = $this->generateAIResponse($incomingMessage);
+                $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
-            }else {
-                if ($customer->completed_onboarding) {
-                    $this->saveMessage($customer->id, $incomingMessage, "received", time());
-                    $aiMessage = $this->generateAIResponse($incomingMessage);
+            }
+
+            // Handle onboarding flow based on the conversation stage
+            switch ($stage) {
+                case 0: // Asking for name
+                    $data = "\n\n" . $incomingMessage; // Add user input to conversation data
+                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $data);
+
                     $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-                    return;
-                }
-                switch($stage){
-                    case 0:
 
+                    // Update to next stage and save user input
+                    $customer->update([
+                        'conversation_stage' => 1,
+                        'current_question_index' => 2,
+                        'questions_json' => $incomingMessage,
+                        "message_json" => $conversation_data,
+                    ]);
+                    break;
 
-                        $data ="\n\n\n\n".$incomingMessage;
-                        $context = AIHelpers::AIContext($this->displayProductQuestions()).$data;
-                        $aiMessage= $this->generateAIResponse($context);
+                case 1: // Asking for location
+                    $data = "\n\n" . $incomingMessage;
+                    $conversation_data .= $data; // Append to the conversation data
+                    $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
 
-                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
-                        $customer->update(['conversation_stage' => 1,
-                            'current_question_index' => 2,
-                            'questions_json' => $incomingMessage,
-                            "message_json" => $conversation_data,]);
-                        break;
-                    case 1:
+                    // After capturing location, complete onboarding and reset the stage
+                    $customer->update([
+                        'conversation_stage' => 0, // Reset stage for next conversation
+                        'completed_onboarding' => true, // Mark onboarding as complete
+                        'message_json' => $conversation_data,
+                    ]);
+                    break;
 
-                        $data ="\n\n\n\n".$incomingMessage;
-                        $context = AIHelpers::AIContext($this->displayProductQuestions()).$data;
-                        $aiMessage= $this->generateAIResponse($context);
-
-                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-                        break;
-
-
-
-
-
-//                  else{
-//                    $conversation_data .= "$incomingMessage\n";
-//                    $this->saveMessage($customer->id, $incomingMessage, "received", time());
-//                    $aiMessage = $this->generateAIResponse($conversation_data);
-//                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-//                    $pattern = '/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}\b/';
-//                    preg_match_all($pattern, $aiMessage, $matches);
-//                    $dates = $matches[0];
-//                    $res = implode(", ", $dates);
-//                    if (!empty($dates)) {
-//                        Log::info("Extracted dates: " . $res);
-//                    } else {
-//                        Log::info("No dates found in AI message.");
-//                    }
-//                    $month = Date("m");
-//                    $year = Date("Y");
-//                    Log::info(" dates *** " . $month);
-//                    Log::info(" dates *** " . $year);
-//                    $dates_param = http_build_query(['text' => $dates]);
-//                    $APIUrl = "https://halimaxcraft.ng/ai/?month=" . $month . "&year=" . $year . "&" . $dates_param;
-//
-//                    Log::info("APIUrl " . $APIUrl);
-//                    $response = Http::withHeaders([
-//                        'Content-Type' => 'application/json',
-//                    ])->get($APIUrl);
-//                    if ($response->successful()) {
-//                        $responseBody = $response->json();
-//                        $url = $responseBody['url'];
-//                        $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $url);
-//                    }
-//                    $customer->update([
-//                        'conversation_stage' => 0,
-//                        'extractedDate' => $dates,
-//                        'completed_onboarding' => true,
-//                        'questions_json' => null,
-//                        'current_question_index' => null,
-//                        'message_json' => null,
-//                    ]);
-             }
-//
-      }
+                default: // Fallback for unexpected stages
+                    Log::warning("Unexpected conversation stage: $stage for customer ID: {$customer->id}");
+                    break;
+            }
         } catch (Exception $e) {
             Log::error('Error handling conversation: ' . $e->getMessage());
             $customer->update([
-                'conversation_stage' => 0,
+                'conversation_stage' => 0, // Reset stage in case of failure
                 'questions_json' => null,
                 'current_question_index' => null,
             ]);
         }
     }
+
+//    protected function handleConversation(Customer $customer, string $incomingMessage): void {
+//        try {
+//            $stage = $customer->conversation_stage ?? 0;
+//            $conversation_data = $customer->message_json ?? "";
+//
+//            if ($customer->stopChat) {
+//                return;
+//            }else {
+//                if ($customer->completed_onboarding) {
+//                    $this->saveMessage($customer->id, $incomingMessage, "received", time());
+//                    $aiMessage = $this->generateAIResponse($incomingMessage);
+//                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+//                    return;
+//                }
+//                switch($stage){
+//                    case 0:
+//
+//
+//                        $data ="\n\n\n\n".$incomingMessage;
+//                        $context = AIHelpers::AIContext($this->displayProductQuestions()).$data;
+//                        $aiMessage= $this->generateAIResponse($context);
+//
+//                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+//
+//                        $customer->update(['conversation_stage' => 1,
+//                            'current_question_index' => 2,
+//                            'questions_json' => $incomingMessage,
+//                            "message_json" => $conversation_data,]);
+//                        break;
+//                    case 1:
+//
+//                        $data ="\n\n\n\n".$incomingMessage;
+//                        $context = AIHelpers::AIContext($this->displayProductQuestions()).$data;
+//                        $aiMessage= $this->generateAIResponse($context);
+//
+//                        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+//                        break;
+//
+//
+//
+//
+//
+////                  else{
+////                    $conversation_data .= "$incomingMessage\n";
+////                    $this->saveMessage($customer->id, $incomingMessage, "received", time());
+////                    $aiMessage = $this->generateAIResponse($conversation_data);
+////                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+////                    $pattern = '/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}\b/';
+////                    preg_match_all($pattern, $aiMessage, $matches);
+////                    $dates = $matches[0];
+////                    $res = implode(", ", $dates);
+////                    if (!empty($dates)) {
+////                        Log::info("Extracted dates: " . $res);
+////                    } else {
+////                        Log::info("No dates found in AI message.");
+////                    }
+////                    $month = Date("m");
+////                    $year = Date("Y");
+////                    Log::info(" dates *** " . $month);
+////                    Log::info(" dates *** " . $year);
+////                    $dates_param = http_build_query(['text' => $dates]);
+////                    $APIUrl = "https://halimaxcraft.ng/ai/?month=" . $month . "&year=" . $year . "&" . $dates_param;
+////
+////                    Log::info("APIUrl " . $APIUrl);
+////                    $response = Http::withHeaders([
+////                        'Content-Type' => 'application/json',
+////                    ])->get($APIUrl);
+////                    if ($response->successful()) {
+////                        $responseBody = $response->json();
+////                        $url = $responseBody['url'];
+////                        $this->sendMessage($customer->phone, "Here is your prediction image", $customer->id, [], $url);
+////                    }
+////                    $customer->update([
+////                        'conversation_stage' => 0,
+////                        'extractedDate' => $dates,
+////                        'completed_onboarding' => true,
+////                        'questions_json' => null,
+////                        'current_question_index' => null,
+////                        'message_json' => null,
+////                    ]);
+//             }
+////
+//      }
+//        } catch (Exception $e) {
+//            Log::error('Error handling conversation: ' . $e->getMessage());
+//            $customer->update([
+//                'conversation_stage' => 0,
+//                'questions_json' => null,
+//                'current_question_index' => null,
+//            ]);
+//        }
+//    }
 
     protected function displayProductQuestions(): string
     {
