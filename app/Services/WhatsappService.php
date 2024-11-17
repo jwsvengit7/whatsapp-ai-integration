@@ -278,39 +278,45 @@ class WhatsappService
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
-            $products = Product::all();
-            Log::info('product: ' . $products);
-            $productData=[];
-            $messageLower = strtolower($incomingMessage);
+            $products = Product::all(); // Retrieve all products
+            Log::info('Products: ' . json_encode($products)); // Log product data for debugging
+
+            $productData = [];
+            $messageLower = strtolower(trim($incomingMessage)); // Convert incoming message to lowercase and trim whitespace
+
             if (str_contains($messageLower, 'select') && str_contains($messageLower, 'products')) {
                 $selectedProduct = null;
-                Log::info('messageLower: ' . $messageLower);
+                foreach ($products as $product) {
+                    $productData[] = $product->name;
 
-                for($i=0;$i<count($products);$i++) {
-                    $productData[$i]=$products[$i]->name;
-                    if (str_contains($messageLower, strtolower($products[$i]->name))) {
-                        $selectedProduct = $products[$i]->name;
-                        Log::info('selectedProduct: ' . $selectedProduct);
+                    if (str_contains($messageLower, strtolower($product->name))) {
+                        $selectedProduct = $product->name;
+                        Log::info('Selected Product: ' . $selectedProduct);
                         break;
                     }
                 }
 
                 if ($selectedProduct) {
+                    // Update conversation data
                     $conversation_data .= "\nSelected Product: " . $selectedProduct;
 
+                    // Generate AI response
                     $aiMessage = $this->generateAIResponse(
                         AIHelpers::AIContext($this->displayProductQuestions())
                     );
 
                     $this->sendMessage($customer->phone, $aiMessage, $customer->id, $productData);
+
+                    // Update customer data
                     $customer->update([
                         'conversation_stage' => $stage + 1,
                         'message_json' => $conversation_data,
                     ]);
-                    return;
-                }
 
+                    return; // Exit function since product has been handled
+                }
             }
+
 
             $data = "\n\n" . $incomingMessage;
             $conversation_data .= $data;
