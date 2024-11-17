@@ -321,7 +321,7 @@ class WhatsappService
                         'conversation_stage' => 0, // Reset stage for next conversation
                         'completed_onboarding' => true, // Mark onboarding as complete
                         'message_json' => $conversation_data,
-                    ])
+                    ]);
                     break;
             }
         } catch (Exception $e) {
