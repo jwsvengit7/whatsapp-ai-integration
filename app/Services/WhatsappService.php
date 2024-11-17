@@ -278,11 +278,7 @@ class WhatsappService
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
-
-            $products = Product::with('questions')->get();
-            $dataProduct = [];
-
-
+            $products = Product::all();
             Log::info('product: ' . $products);
             $messageLower = strtolower($incomingMessage);
             if (str_contains($messageLower, 'select') && str_contains($messageLower, 'products')) {
@@ -295,7 +291,6 @@ class WhatsappService
                         Log::info('selectedProduct: ' . $selectedProduct);
                         break;
                     }
-                    $dataProduct[]=$product;
                 }
 
                 if ($selectedProduct) {
@@ -305,7 +300,7 @@ class WhatsappService
                         AIHelpers::AIContext($this->displayProductQuestions())
                     );
 
-                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, $dataProduct);
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, $products);
                     $customer->update([
                         'conversation_stage' => $stage + 1,
                         'message_json' => $conversation_data,
@@ -315,23 +310,23 @@ class WhatsappService
 
             }
 
-                            $data = "\n\n" . $incomingMessage;
-                            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $data);
+            $data = "\n\n" . $incomingMessage;
+            $conversation_data .= $data;
+            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
 
-                            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
-                            $customer->update([
-                                'conversation_stage' => $customer->conversation_stage+1,
-                                'current_question_index' => $customer->current_question_index+1,
-                                'questions_json' => $incomingMessage,
-                                "message_json" => $conversation_data,
-                            ]);
-
-
+            $customer->update([
+                'conversation_stage' => $customer->conversation_stage+1,
+                'message_json' => $conversation_data,
+            ]);
 
                 }
-            catch
-                (Exception $e) {
+            catch (Exception $e) {
+                $customer->update([
+                    'conversation_stage' => 0,
+                    'message_json' => null,
+                ]);
                     Log::error('Error handling conversation: ' . $e->getMessage());
 
                 }
@@ -349,7 +344,7 @@ class WhatsappService
         $extractedName = null;
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $message, $matches)) {
-                $extractedName = $matches[1];
+                $extractedName = $matches[1]; // The captured name
                 break;
             }
         }
