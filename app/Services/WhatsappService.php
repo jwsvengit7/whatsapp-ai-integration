@@ -286,7 +286,7 @@ class WhatsappService
                 return;
             }
 
-            if ($this->isPredictionMessage($incomingMessage,$conversationData)) {
+            if ($this->isPredictionMessage($incomingMessage)) {
                 Log::info('isPredictionMessage ' . $incomingMessage);
                 $this->markOnboardingComplete($customer, $conversationData, $incomingMessage);
                 return;
@@ -349,49 +349,26 @@ class WhatsappService
         return false;
     }
 
-    /**
-     * @throws Exception
-     */
-    private function isPredictionMessage(string $incomingMessage, string &$conversationData): bool
+    private function isPredictionMessage(string $incomingMessage): bool
     {
-        $conversationData .= "\n\n" . $incomingMessage;
-
-        $aiMessage = $this->generateAIResponse(
-            AIHelpers::AIContext($this->displayProductQuestions()) . $conversationData
-        );
-
         $predictionKeyword = "Based on the information you provided";
         $requiredEmojis = "😊🌸";
+        Log::info('predictionKeyword: ' . $predictionKeyword);
+        Log::info('requiredEmojis: ' . $requiredEmojis);
+        return mb_strpos($incomingMessage, $predictionKeyword) !== false && mb_strpos($incomingMessage, $requiredEmojis) !== false;
 
-        Log::info('Incoming message content: ' . $aiMessage);
-        Log::info('Checking for predictionKeyword: ' . $aiMessage);
-        Log::info('Checking for requiredEmojis: ' . $aiMessage);
-
-        $containsKeyword = str_contains($aiMessage, $predictionKeyword);
-        $containsEmojis = str_contains($aiMessage, $requiredEmojis);
-
-        Log::info('Contains predictionKeyword? ' . ($containsKeyword ? 'Yes' : 'No'));
-        Log::info('Contains requiredEmojis? ' . ($containsEmojis ? 'Yes' : 'No'));
-
-        return $containsKeyword && $containsEmojis;
-    }
+   }
 
     private function markOnboardingComplete(Customer $customer, string &$conversationData, string $incomingMessage): void
     {
         $conversationData .= "\n\n" . $incomingMessage;
-        Log::info('Updating conversation data: ' . $conversationData);
-
-        $updateStatus = $customer->update([
+        Log::info('markOnboardingComplete: ' . $conversationData);
+        $customer->update([
             'conversation_stage' => $customer->conversation_stage + 1,
             'message_json' => $conversationData,
             'completed_onboarding' => true,
         ]);
-
-        Log::info('Customer update status: ' . ($updateStatus ? 'Success' : 'Failed'));
     }
-
-
-
 
     /**
      * @throws ConnectionException
