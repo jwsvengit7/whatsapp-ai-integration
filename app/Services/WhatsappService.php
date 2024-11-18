@@ -353,22 +353,36 @@ class WhatsappService
     {
         $predictionKeyword = "Based on the information you provided";
         $requiredEmojis = "😊🌸";
-        Log::info('predictionKeyword: ' . $predictionKeyword);
-        Log::info('requiredEmojis: ' . $requiredEmojis);
 
-        return str_contains($incomingMessage, $predictionKeyword) && str_contains($incomingMessage, $requiredEmojis);
+        Log::info('Incoming message content: ' . $incomingMessage);
+        Log::info('Checking for predictionKeyword: ' . $predictionKeyword);
+        Log::info('Checking for requiredEmojis: ' . $requiredEmojis);
+
+        $containsKeyword = str_contains($incomingMessage, $predictionKeyword);
+        $containsEmojis = str_contains($incomingMessage, $requiredEmojis);
+
+        Log::info('Contains predictionKeyword? ' . ($containsKeyword ? 'Yes' : 'No'));
+        Log::info('Contains requiredEmojis? ' . ($containsEmojis ? 'Yes' : 'No'));
+
+        return $containsKeyword && $containsEmojis;
     }
 
     private function markOnboardingComplete(Customer $customer, string &$conversationData, string $incomingMessage): void
     {
         $conversationData .= "\n\n" . $incomingMessage;
+        Log::info('Updating conversation data: ' . $conversationData);
 
-        $customer->update([
+        $updateStatus = $customer->update([
             'conversation_stage' => $customer->conversation_stage + 1,
             'message_json' => $conversationData,
             'completed_onboarding' => true,
         ]);
+
+        Log::info('Customer update status: ' . ($updateStatus ? 'Success' : 'Failed'));
     }
+
+
+
 
     /**
      * @throws ConnectionException
