@@ -282,10 +282,12 @@ class WhatsappService
 
             // Handle product-related interactions
             if ($this->handleProductSelection($customer, $incomingMessage, $products, $conversationData)) {
+                Log::info('Handle product-related interactions: ' . $conversationData);
                 return;
             }
 
             if ($this->isPredictionMessage($incomingMessage)) {
+                Log::info('isPredictionMessage ' . $incomingMessage);
                 $this->markOnboardingComplete($customer, $conversationData, $incomingMessage);
                 return;
             }
@@ -351,6 +353,8 @@ class WhatsappService
     {
         $predictionKeyword = "Based on the information you provided";
         $requiredEmojis = "😊🌸";
+        Log::info('predictionKeyword: ' . $predictionKeyword);
+        Log::info('requiredEmojis: ' . $requiredEmojis);
 
         return str_contains($incomingMessage, $predictionKeyword) && str_contains($incomingMessage, $requiredEmojis);
     }
