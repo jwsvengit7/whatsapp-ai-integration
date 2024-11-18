@@ -277,20 +277,9 @@ class WhatsappService
             }
 
 
-            $products = Product::all();
-            Log::info('Products: ' . json_encode($products));
 
-            // Handle product-related interactions
-            if ($this->handleProductSelection($customer, $incomingMessage, $products, $conversationData)) {
-                Log::info('Handle product-related interactions: ' . $conversationData);
-                return;
-            }
 
-            if ($this->isPredictionMessage($incomingMessage)) {
-                Log::info('isPredictionMessage ' . $incomingMessage);
-                $this->markOnboardingComplete($customer, $conversationData, $incomingMessage);
-                return;
-            }
+
 
 
             $this->defaultConversationFlow($customer, $incomingMessage, $conversationData);
@@ -395,6 +384,20 @@ class WhatsappService
         $aiMessage = $this->generateAIResponse(
             AIHelpers::AIContext($this->displayProductQuestions()) . $conversationData
         );
+        $products = Product::all();
+        Log::info('Products: ' . json_encode($products));
+
+        // Handle product-related interactions
+        if ($this->handleProductSelection($customer, $aiMessage, $products, $conversationData)) {
+            Log::info('Handle product-related interactions: ' . $conversationData);
+            return;
+        }
+
+        if ($this->isPredictionMessage($aiMessage)) {
+            Log::info('isPredictionMessage ' . $aiMessage);
+            $this->markOnboardingComplete($customer, $conversationData, $aiMessage);
+            return;
+        }
 
         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
