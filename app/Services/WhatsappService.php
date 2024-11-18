@@ -277,9 +277,20 @@ class WhatsappService
             }
 
 
+            $products = Product::all();
+            Log::info('Products: ' . json_encode($products));
 
+            // Handle product-related interactions
+            if ($this->handleProductSelection($customer, $incomingMessage, $products, $conversationData)) {
+                Log::info('Handle product-related interactions: ' . $conversationData);
+                return;
+            }
 
-
+            if ($this->isPredictionMessage($incomingMessage,$conversationData)) {
+                Log::info('isPredictionMessage ' . $incomingMessage);
+                $this->markOnboardingComplete($customer, $conversationData, $incomingMessage);
+                return;
+            }
 
 
             $this->defaultConversationFlow($customer, $incomingMessage, $conversationData);
@@ -338,17 +349,26 @@ class WhatsappService
         return false;
     }
 
-    private function isPredictionMessage(string $incomingMessage): bool
+    /**
+     * @throws Exception
+     */
+    private function isPredictionMessage(string $incomingMessage, string &$conversationData): bool
     {
+        $conversationData .= "\n\n" . $incomingMessage;
+
+        $aiMessage = $this->generateAIResponse(
+            AIHelpers::AIContext($this->displayProductQuestions()) . $conversationData
+        );
+
         $predictionKeyword = "Based on the information you provided";
         $requiredEmojis = "😊🌸";
 
-        Log::info('Incoming message content: ' . $incomingMessage);
-        Log::info('Checking for predictionKeyword: ' . $predictionKeyword);
-        Log::info('Checking for requiredEmojis: ' . $requiredEmojis);
+        Log::info('Incoming message content: ' . $aiMessage);
+        Log::info('Checking for predictionKeyword: ' . $aiMessage);
+        Log::info('Checking for requiredEmojis: ' . $aiMessage);
 
-        $containsKeyword = str_contains($incomingMessage, $predictionKeyword);
-        $containsEmojis = str_contains($incomingMessage, $requiredEmojis);
+        $containsKeyword = str_contains($aiMessage, $predictionKeyword);
+        $containsEmojis = str_contains($aiMessage, $requiredEmojis);
 
         Log::info('Contains predictionKeyword? ' . ($containsKeyword ? 'Yes' : 'No'));
         Log::info('Contains requiredEmojis? ' . ($containsEmojis ? 'Yes' : 'No'));
@@ -384,20 +404,6 @@ class WhatsappService
         $aiMessage = $this->generateAIResponse(
             AIHelpers::AIContext($this->displayProductQuestions()) . $conversationData
         );
-        $products = Product::all();
-        Log::info('Products: ' . json_encode($products));
-
-        // Handle product-related interactions
-        if ($this->handleProductSelection($customer, $aiMessage, $products, $conversationData)) {
-            Log::info('Handle product-related interactions: ' . $conversationData);
-            return;
-        }
-
-        if ($this->isPredictionMessage($aiMessage)) {
-            Log::info('isPredictionMessage ' . $aiMessage);
-            $this->markOnboardingComplete($customer, $conversationData, $aiMessage);
-            return;
-        }
 
         $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
 
