@@ -259,147 +259,100 @@ class WhatsappService
     /**
      * @throws Exception
      */
+
     protected function handleConversation(Customer $customer, string $incomingMessage): void
     {
         $this->handleNameInput($customer, $incomingMessage);
 
         try {
             $stage = $customer->conversation_stage ?? 0;
-            $conversationData = $customer->message_json ?? "";
+            $conversation_data = $customer->message_json ?? "";
 
             if ($customer->stopChat) {
                 return;
             }
 
             if ($customer->completed_onboarding) {
-                $this->processCompletedOnboarding($customer, $incomingMessage);
+                $this->saveMessage($customer->id, $incomingMessage, "received", time());
+                $aiMessage = $this->generateAIResponse($incomingMessage);
+                $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
-
-
             $products = Product::all();
             Log::info('Products: ' . json_encode($products));
 
-            // Handle product-related interactions
-            if ($this->handleProductSelection($customer, $incomingMessage, $products, $conversationData)) {
-                Log::info('Handle product-related interactions: ' . $conversationData);
-                return;
+            $productData = [];
+            $messageLower = strtolower(trim($incomingMessage));
+
+            if (str_contains($messageLower, 'here are the available products we have:')) {
+                Log::info('messageLower: ' . $messageLower);
+                $selectedProduct = null;
+                foreach ($products as $product) {
+                    $productData[] = $product->name;
+
+                    if (str_contains($messageLower, strtolower($product->name))) {
+                        $selectedProduct = $product->name;
+                        Log::info('Selected Product: ' . $selectedProduct);
+                        break;
+                    }
+                }
+
+                if ($selectedProduct) {
+                    $conversation_data .= "\nSelected Product: " . $selectedProduct;
+
+                    $aiMessage = $this->generateAIResponse(
+                        AIHelpers::AIContext($this->displayProductQuestions())
+                    );
+
+                    $this->sendMessage($customer->phone, $aiMessage, $customer->id, $productData);
+
+                    $customer->update([
+                        'conversation_stage' => $stage + 1,
+                        'message_json' => $conversation_data,
+                    ]);
+
+                    return;
+                }
+
             }
 
-            if ($this->isPredictionMessage($incomingMessage)) {
-                Log::info('isPredictionMessage ' . $incomingMessage);
-                $this->markOnboardingComplete($customer, $conversationData, $incomingMessage);
-                return;
+
+
+
+
+            $data = "\n\n" . $incomingMessage;
+            $conversation_data .= $data;
+            $predictionKeyword = "Based on the information you provided";
+            $requiredEmojis = "😊🌸";
+
+
+            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+            $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
+            if (str_contains($incomingMessage, $predictionKeyword) && str_contains($aiMessage, $requiredEmojis)) {
+                $customer->update([
+                    'conversation_stage' => $customer->conversation_stage+1,
+                    'message_json' => $conversation_data,
+                    "completed_onboarding"=>true
+                ]);
+            }else {
+
+
+                $customer->update([
+                    'conversation_stage' => $customer->conversation_stage + 1,
+                    'message_json' => $conversation_data,
+                ]);
             }
 
+                }
+            catch (Exception $e) {
+                $customer->update([
+                    'conversation_stage' => 0,
+                    'message_json' => null,
+                ]);
+                    Log::error('Error handling conversation: ' . $e->getMessage());
 
-            $this->defaultConversationFlow($customer, $incomingMessage, $conversationData);
-        } catch (Exception $e) {
-            $this->resetCustomerStateOnError($customer, $e);
-        }
+                }
     }
-
-    /**
-     * @throws ConnectionException
-     * @throws Exception
-     */
-    private function processCompletedOnboarding(Customer $customer, string $incomingMessage): void
-    {
-        $this->saveMessage($customer->id, $incomingMessage, "received", time());
-        $aiMessage = $this->generateAIResponse($incomingMessage);
-        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-    }
-
-    /**
-     * @throws ConnectionException
-     * @throws Exception
-     */
-    private function handleProductSelection(Customer $customer, string $incomingMessage, $products, &$conversationData): bool
-    {
-        $messageLower = strtolower(trim($incomingMessage));
-
-        if (!str_contains($messageLower, 'here are the available products we have:')) {
-            return false;
-        }
-
-        $selectedProduct = null;
-        foreach ($products as $product) {
-            if (str_contains($messageLower, strtolower($product->name))) {
-                $selectedProduct = $product->name;
-                Log::info('Selected Product: ' . $selectedProduct);
-                break;
-            }
-        }
-
-        if ($selectedProduct) {
-            $conversationData .= "\nSelected Product: " . $selectedProduct;
-            $aiMessage = $this->generateAIResponse(
-                AIHelpers::AIContext($this->displayProductQuestions())
-            );
-            $this->sendMessage($customer->phone, $aiMessage, $customer->id, [$selectedProduct]);
-
-            $customer->update([
-                'conversation_stage' => $customer->conversation_stage + 1,
-                'message_json' => $conversationData,
-            ]);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private function isPredictionMessage(string $incomingMessage): bool
-    {
-        $predictionKeyword = "Based on the information you provided";
-        $requiredEmojis = "😊🌸";
-        Log::info('predictionKeyword: ' . $predictionKeyword);
-        Log::info('requiredEmojis: ' . $requiredEmojis);
-        return mb_strpos($incomingMessage, $predictionKeyword) !== false && mb_strpos($incomingMessage, $requiredEmojis) !== false;
-
-   }
-
-    private function markOnboardingComplete(Customer $customer, string &$conversationData, string $incomingMessage): void
-    {
-        $conversationData .= "\n\n" . $incomingMessage;
-        Log::info('markOnboardingComplete: ' . $conversationData);
-        $customer->update([
-            'conversation_stage' => $customer->conversation_stage + 1,
-            'message_json' => $conversationData,
-            'completed_onboarding' => true,
-        ]);
-    }
-
-    /**
-     * @throws ConnectionException
-     * @throws Exception
-     */
-    private function defaultConversationFlow(Customer $customer, string $incomingMessage, string &$conversationData): void
-    {
-        $conversationData .= "\n\n" . $incomingMessage;
-
-        $aiMessage = $this->generateAIResponse(
-            AIHelpers::AIContext($this->displayProductQuestions()) . $conversationData
-        );
-
-        $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-
-        $customer->update([
-            'conversation_stage' => $customer->conversation_stage + 1,
-            'message_json' => $conversationData,
-        ]);
-    }
-
-    private function resetCustomerStateOnError(Customer $customer, Exception $e): void
-    {
-        Log::error('Error handling conversation: ' . $e->getMessage());
-
-        $customer->update([
-            'conversation_stage' => 0,
-            'message_json' => null,
-        ]);
-    }
-
 
     protected function handleNameInput(Customer $customer, string $incomingMessage): void
     {
