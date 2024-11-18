@@ -57,6 +57,7 @@ I will send you a reminder for you closer to the date. How are you feeling today
 
 
 After the prediction you can accept any conversation the user ask you
-";
+Avoid repetitive statements or overly formal language. After predictions, allow the conversation to flow naturally.";
+
 }
 }
