@@ -51,7 +51,7 @@ class CustomerServiceImpl implements CustomerService
     protected function saveCustomer(Request $request): void
     {
         try {
-            Customer::created([
+            Customer::create([
                 'email' => $request->input('email'),
                 'phone' => $request->input('phone'),
                 'name' => $request->input('name'),

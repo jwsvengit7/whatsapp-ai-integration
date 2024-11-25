@@ -65,7 +65,6 @@ export default {
 
         const id = ref('');
         const phone = ref('');
-        const name = ref('');
 
         const handleResponse = async (response, text) => {
             if ([200, 201].includes(response.status)) {
@@ -99,7 +98,6 @@ export default {
             loadUser();
             id.value = new URLSearchParams(window.location.search).get('id');
             phone.value = new URLSearchParams(window.location.search).get('phone');
-            name.value = new URLSearchParams(window.location.search).get('name');
             if (id.value) {
                 loadAllConversation(id.value);
             } else {
@@ -107,7 +105,7 @@ export default {
             }
         });
 
-        return { user, phone, name, utils, allConversation, loading, error, pic, id, isSidebarVisible, toggleSidebar, handleResponse, handleError };
+        return { user, phone,  utils, allConversation, loading, error, pic, id, isSidebarVisible, toggleSidebar, handleResponse, handleError };
     }
 };
 </script>

@@ -62,7 +62,7 @@ export default {
     components: { AppHeader, AppSidebar},
     methods:{
         openLink(item) {
-            this.$router.push("view-conversations?id="+item.id+"&name="+item.name+"&phone="+item.phone);
+            this.$router.push("view-conversations?id="+item.id+"&phone="+item.phone);
         }
     },
     setup() {

@@ -211,7 +211,6 @@ class WhatsappService
         }
     }
 
-
     /**
      * Save the incoming message to the database.
      *

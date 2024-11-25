@@ -163,6 +163,7 @@ class AdminServiceImpl implements AdminService
     {
         $id = $request->query('id');
         $user = CustomerUtils::getJWTUser();
+        $conversations=[];
 
         if ($user == null) {
             return ResponseUtils::respondWithError("User not found.", Response::HTTP_NOT_FOUND);
@@ -179,8 +180,7 @@ class AdminServiceImpl implements AdminService
             return ResponseUtils::respondWithSuccess($conversations->toArray(), Response::HTTP_OK);
         }
 
-        $conversations = Conversation::all();
-        return ResponseUtils::respondWithSuccess($conversations->toArray(), Response::HTTP_OK);
+        return ResponseUtils::respondWithSuccess($conversations, Response::HTTP_OK);
     }
 
 
