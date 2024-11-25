@@ -272,8 +272,10 @@ class WhatsappService
             }
 
             if ($customer->completed_onboarding) {
-                $this->saveMessage($customer->id, $incomingMessage, "received", time());
-                $aiMessage = $this->generateAIResponse($incomingMessage);
+                $data = "\n\n" . $incomingMessage;
+                $conversation_data .= $data;
+                $this->saveMessage($customer->id, $conversation_data, "received", time());
+                $aiMessage = $this->generateAIResponse($conversation_data);
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
