@@ -327,7 +327,7 @@ class WhatsappService
 
             $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
             $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
-            if (str_contains($incomingMessage, $predictionKeyword) && str_contains($aiMessage, $requiredEmojis)) {
+            if (str_contains($aiMessage, $predictionKeyword) && str_contains($aiMessage, $requiredEmojis)) {
                 $customer->update([
                     'conversation_stage' => $customer->conversation_stage+1,
                     'message_json' => $conversation_data,
