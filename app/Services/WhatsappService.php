@@ -273,12 +273,13 @@ class WhatsappService
 
             if ($customer->completed_onboarding) {
                 $data = "\n\n" . $incomingMessage;
-                $conversation_data .= $data;
+                $conversation_data .= $data . " Prediction has been completed. You can chat with the AI for customer care assistance or inquire about any product.". $this->displayProductQuestions();;
                 $this->saveMessage($customer->id, $conversation_data, "received", time());
                 $aiMessage = $this->generateAIResponse($conversation_data);
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
+
             $products = Product::all();
             Log::info('Products: ' . json_encode($products));
 
