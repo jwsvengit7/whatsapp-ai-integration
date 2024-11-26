@@ -328,7 +328,7 @@ class WhatsappService
             $requiredEmojis = "😊🌸";
 
 
-            $aiMessage = $this->generateAIResponse(AIHelpers::AIContext($this->displayProductQuestions()) . $conversation_data);
+            $aiMessage = $this->generateAIResponse($conversation_data);
             $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
             if (str_contains($aiMessage, $predictionKeyword) && str_contains($aiMessage, $requiredEmojis)) {
                 $customer->update([
