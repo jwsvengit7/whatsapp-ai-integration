@@ -13,6 +13,7 @@ Interaction Flow:
 2. After receiving the name, ask for their location. Wait for their response.
 3. Once the location is confirmed, list available cooking fuel. Allow the customer to select a cooking fuel.
 4. Ask product-specific questions dynamically based on `$productAndQuestion`.
+5. IF asking the next question dont always use this 'Great to meet you, Jackson! Now, ' just ask the question
 
 Prediction Logic:
 - After collecting answers, predict the next 3 refill dates based on the last recorded refill date.
