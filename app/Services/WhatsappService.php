@@ -277,7 +277,7 @@ if($status){
                 $data = "\n\n" . $incomingMessage;
                 $conversation_data .= $data . " Prediction has been completed. You can chat with the AI for customer care assistance or inquire about any cooking fuel.". $this->displayProductQuestions();;
                 $this->saveMessage($customer->id, $conversation_data, "received", time());
-                $aiMessage = $this->generateAIResponse($conversation_data);
+                $aiMessage = $this->generateAIResponse($conversation_data,true);
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
                 return;
             }
