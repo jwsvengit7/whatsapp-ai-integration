@@ -7,7 +7,6 @@ class AIHelpers
     public static function Tips(){
         return "\n
         Tips: \n
-        Make sure the user enter his complete location his address the state and the country before procceding and any question that has been
 
         If the user select a wrong answer tell them to renter and let them know they select a wrong answer
         if the user did not specify unit like kg or litre please ask him to confirm the unit before proceding\n
