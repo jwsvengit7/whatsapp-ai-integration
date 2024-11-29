@@ -193,7 +193,7 @@ if($status){
             'model' => env('OPENAI_API_MODEL'),
             'messages' => [
                 ["role" => "system", "content" => $context],
-                ["role" => "user", "content" => $message]
+                ["role" => "user", "content" => $context.'\n'.$message]
             ],
             'max_tokens' => 1200,
             'temperature' => 0.7,
