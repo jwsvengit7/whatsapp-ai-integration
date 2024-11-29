@@ -7,9 +7,10 @@ class AIHelpers
     public static function Tips(){
         return "\n
         Tips: \n
+        Make sure the user enter his complete location his address the state and the country before procceding and any question that has been
 
         If the user select a wrong answer tell them to renter and let them know they select a wrong answer
-        if the user did not specify unit like kg or litre please ask him to confirm the unit before procceding\n
+        if the user did not specify unit like kg or litre please ask him to confirm the unit before proceding\n
         ";
     }
     public static function AIContext(string $productAndQuestion): string
@@ -23,6 +24,7 @@ Interaction Flow:
 3. Once the location is confirmed, list available cooking fuel. Allow the customer to select a cooking fuel.
 4. Ask product-specific questions dynamically based on `$productAndQuestion`.
  show the list of $productAndQuestion
+. if the user selected what is not part of the cooking fuel that Kike BIO Fuel Has on the list please prompt him and tell them we dont have this cooking fuel at the moment and still return the avalable cooking fuel
 5. IF asking the next question dont always use this 'Great to meet you, Jackson! Now, ' just ask the question
 6. please be smart stop repeating question that has been answered
 
