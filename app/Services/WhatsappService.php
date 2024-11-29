@@ -273,7 +273,7 @@ class WhatsappService
 
             if ($customer->completed_onboarding) {
                 $data = "\n\n" . $incomingMessage;
-                $conversation_data .= $data . " Prediction has been completed. You can chat with the AI for customer care assistance or inquire about any product.". $this->displayProductQuestions();;
+                $conversation_data .= $data . " Prediction has been completed. You can chat with the AI for customer care assistance or inquire about any cooking fuel.". $this->displayProductQuestions();;
                 $this->saveMessage($customer->id, $conversation_data, "received", time());
                 $aiMessage = $this->generateAIResponse($conversation_data);
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
@@ -286,7 +286,7 @@ class WhatsappService
             $productData = [];
             $messageLower = strtolower(trim($incomingMessage));
 
-            if (str_contains($messageLower, 'here are the available products we have:')) {
+            if (str_contains($messageLower, 'here are the available cooking fuel we have:')) {
                 Log::info('messageLower: ' . $messageLower);
                 $selectedProduct = null;
                 foreach ($products as $product) {
@@ -302,9 +302,7 @@ class WhatsappService
                 if ($selectedProduct) {
                     $conversation_data .= "\nSelected Product: " . $selectedProduct;
 
-                    $aiMessage = $this->generateAIResponse(
-                        AIHelpers::AIContext($this->displayProductQuestions())
-                    );
+                    $aiMessage = $this->generateAIResponse($conversation_data);
 
                     $this->sendMessage($customer->phone, $aiMessage, $customer->id, $productData);
 
