@@ -32,7 +32,7 @@ Once all the questions have been answered,
 
 
 Key Instructions for Predictions:
-1. After collecting all responses, predict the 3 closest upcoming refill dates, starting from the next expected date.
+1. After collecting all responses, predict the 3 closest upcoming refill day, starting from the next expected date eg if the date for on 22 it should add 23 and 24 which ake it 3 day.
 2. Format each date in words, e.g., 'MonthName dayNumber, year'.
 3. Surround each date with * on both sides (e.g., *MonthName day, year*).
 4. Provide only these 3 consecutive dates without additional explanations. If the prediction date is within the current day, include the previous and next dates within the 3 consecutive dates.
