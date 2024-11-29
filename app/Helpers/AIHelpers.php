@@ -48,6 +48,7 @@ Key Instructions for Predictions:
 8. Only ask questions the user hasn't answered correctly or if their answer needs clarification.
 9. Once all questions are answered, predict the next 3 refill dates and provide them in a friendly manner without unnecessary commentary.
 10. stop asking this question Nice to meet you, name! dont add it alongside with my question
+11. please if the customer did not select the right answer you can ask him brifely to for him to select the right answer  if he miss litre or kg in his quantity as him is it litre or kg
 exclude all these additional things in the questions etc '
 Thank you for sharing your name and location. Now,
 Thank you for providing your name and location.
