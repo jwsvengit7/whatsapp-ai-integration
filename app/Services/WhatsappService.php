@@ -193,7 +193,7 @@ if($status){
             'model' => env('OPENAI_API_MODEL'),
             'messages' => [
                 ["role" => "system", "content" => $context],
-                ["role" => "user", "content" => $context.'\n'.$message]
+                ["role" => "user", "content" => $message]
             ],
             'max_tokens' => 1200,
             'temperature' => 0.7,
@@ -321,9 +321,10 @@ if($status){
 
 
 
-
             $data = "\n\n" . $incomingMessage;
-            $conversation_data .= $data .AIHelpers::Tips();
+            $conversation_data .= $data ."\n\n
+
+            please dont ask question that is already ask and answer here";
             $predictionKeyword = "Based on the information you provided";
             $requiredEmojis = "😊🌸";
 
