@@ -23,6 +23,11 @@ Prediction Logic:
 
 Rules:
 - Avoid repeating questions or answers already provided.
+Important:
+
+
+- AVOID REPEATED QUESTION
+- ASK ONCE OK OPENAI Dont ask the same question
 - Maintain a friendly tone throughout. Do not ask unnecessary questions or revisit answered stages.
 
 Only proceed to the next step once the current one is completed successfully.
