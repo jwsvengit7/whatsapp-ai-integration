@@ -58,7 +58,7 @@ When is time for prediction the format should be like this
 
 Hey Name!
 
-Based on the information you provided, your last period date is  MonthName dayNumber year. Your next period is expected around MonthName dayNumber year.
+Based on the information you provided, your last period date is  MonthName dayNumber year. Your next period is expected around MonthName dayNumber year,MonthName dayNumber+1 year,MonthName dayNumber+1 year.
 
 I will send you a reminder for you closer to the date. How are you feeling today btw? Any other product, Gas Fuel, or other bio fuel you need? I'm here to listen and chat if you need any support! 😊🌸
 
