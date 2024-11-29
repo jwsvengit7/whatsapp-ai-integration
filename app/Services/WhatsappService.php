@@ -323,7 +323,7 @@ if($status){
 
 
             $data = "\n\n" . $incomingMessage;
-            $conversation_data .= $data;
+            $conversation_data .= $data .AIHelpers::Tips();
             $predictionKeyword = "Based on the information you provided";
             $requiredEmojis = "😊🌸";
 

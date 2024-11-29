@@ -3,6 +3,15 @@ namespace App\Helpers;
 
 class AIHelpers
 {
+
+    public static function Tips(){
+        return "\n
+        Tips: \n
+
+        If the user select a wrong answer tell them to renter and let them know they select a wrong answer
+        if the user did not specify unit like kg or litre please ask him to confirm the unit before procceding\n
+        ";
+    }
     public static function AIContext(string $productAndQuestion): string
     {
         return "
