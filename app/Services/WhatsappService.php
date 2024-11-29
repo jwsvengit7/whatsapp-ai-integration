@@ -275,7 +275,7 @@ if($status){
 
             if ($customer->completed_onboarding) {
                 $data = "\n\n" . $incomingMessage;
-                $conversation_data .= $data . " Prediction has been completed. You can chat with the AI for customer care assistance or inquire about any cooking fuel.". $this->displayProductQuestions();;
+                $conversation_data .= $data;
                 $this->saveMessage($customer->id, $conversation_data, "received", time());
                 $aiMessage = $this->generateAIResponse($conversation_data,true);
                 $this->sendMessage($customer->phone, $aiMessage, $customer->id, []);
@@ -326,6 +326,7 @@ if($status){
             $conversation_data .= $data;
             $predictionKeyword = "Based on the information you provided";
             $requiredEmojis = "😊🌸";
+
 
 
             $aiMessage = $this->generateAIResponse($conversation_data);
